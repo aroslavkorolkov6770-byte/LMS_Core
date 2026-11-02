@@ -1,0 +1,29 @@
+{
+  "name": "@lms-core/lms-web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --hostname 127.0.0.1",
+    "build": "next build",
+    "start": "next start --hostname 127.0.0.1",
+    "check": "tsc --project tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@lms-core/shared": "workspace:*",
+    "@supabase/supabase-js": "^2.104.1",
+    "next": "^15.3.2",
+    "nodemailer": "^8.0.7",
+    "openai": "^6.39.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "web-push": "^3.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "@types/nodemailer": "^8.0.0",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "@types/web-push": "^3.6.4",
+    "typescript": "^5.7.2"
+  }
+}

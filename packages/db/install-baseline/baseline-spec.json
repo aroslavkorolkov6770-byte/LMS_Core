@@ -1,0 +1,6 @@
+{
+  "version": "core-runtime-schema-v1",
+  "sqlFile": "0000_core_runtime_v1.sql",
+  "sha256": "5bfad82fc90161b0ce01b9c4ddb3324dc144c599576986f54925c1a1c4fff30b",
+  "schemaSha256": "a5f0c4d334a4f3e1aba9bcb0fa79b36f81fb2b3c7b01d5b04d21bda98c6bf68e"
+}

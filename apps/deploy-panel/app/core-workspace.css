@@ -1,0 +1,98 @@
+/* Inherit the Core palette, but never forward it into the LMS preview. */
+.form-section.credentials-card, html[data-core-theme] .form-section.credentials-card { border: 1px solid var(--accent); border-left-width: 4px; background: color-mix(in srgb, var(--accent-soft) 35%, var(--surface-strong)); }
+.credentials-card .form-section-head { display: grid; gap: 8px; }
+.credentials-card .form-section-head p { max-width: 740px; text-align: left; }
+.form-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.client-picker-summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; width: 100%; min-height: 32px; padding: 0; border: 0; background: transparent; font: inherit; text-align: left; cursor: pointer; color: var(--text); }
+.client-picker-summary::-webkit-details-marker { display: none; }
+.client-picker-summary > span:first-child { display: grid; gap: 4px; min-width: 0; }
+.client-picker-summary strong { font-size: 16px; overflow-wrap: anywhere; }
+.client-picker-caption { color: var(--muted); font-size: 12px; }
+.client-picker-action { display: inline-flex; align-items: center; gap: 8px; color: var(--accent); font-size: 13px; flex-shrink: 0; }
+.client-picker-count { background: var(--accent-soft); border-radius: 5px; padding: 2px 6px; }
+.client-picker-action svg { transition: transform 160ms ease; }
+.client-picker[data-expanded="true"] .client-picker-action svg { transform: rotate(180deg); }
+.client-picker-summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; border-radius: 4px; }
+.client-picker-tools { display: flex; align-items: end; gap: 12px; margin: 18px 0 14px; flex-wrap: wrap; }
+.client-picker-tools label { display: grid; gap: 6px; flex: 1 1 260px; min-width: 0; color: var(--muted); font-size: 12px; }
+.client-picker-tools input { width: 100%; min-width: 0; border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; color: var(--text); background: var(--surface-strong); font: inherit; }
+.client-picker-result { color: var(--muted); font-size: 12px; padding-bottom: 10px; }
+.client-picker-list { max-height: min(52vh, 440px); overflow-y: auto; overscroll-behavior: contain; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 3px; scrollbar-width: none; }
+.client-picker-list::-webkit-scrollbar { width: 0; height: 0; }
+.client-picker-list .client-card { min-width: 0; }
+.client-picker-list .client-topline > div { min-width: 0; }
+.client-picker-list .client-topline h3, .client-picker-list .client-topline p { overflow-wrap: anywhere; }
+@media (max-width: 700px) { .client-picker-list { grid-template-columns: 1fr; } .client-picker-summary { align-items: start; } .client-picker-action { font-size: 12px; } }
+html[data-core-theme] body { background: var(--bg); --panel-font: 13px; --panel-caption: 12px; --panel-gap: 14px; --panel-pad: 18px; }
+html[data-core-theme] .page-shell { padding: 16px 18px 40px; max-width: 1440px; }
+html[data-core-theme] .compact-hero { padding: 16px 18px; }
+html[data-core-theme] .compact-hero h1 { font-size: 24px; }
+html[data-core-theme] .compact-hero p { font-size: var(--panel-caption); }
+html[data-core-theme] .hero-kicker { background: var(--accent-soft); color: var(--accent); }
+html[data-core-theme] .operator-strip { background: var(--surface); border-color: var(--line); position: sticky; top: 0; z-index: 10; }
+html[data-core-theme] .operator-strip a, html[data-core-theme] .operator-strip button { font-size: var(--panel-font); }
+html[data-core-theme] .workspace-tab-active { border-color: var(--accent) !important; }
+html[data-core-theme] .surface-card { padding: var(--panel-pad); }
+html[data-core-theme] .content-grid { gap: var(--panel-gap); }
+html[data-core-theme] .section-note, html[data-core-theme] .status-caption, html[data-core-theme] .client-meta, html[data-core-theme] .form-section-head p { font-size: var(--panel-caption); }
+html[data-core-theme] .form-grid label, html[data-core-theme] .form-grid input, html[data-core-theme] .form-grid select, html[data-core-theme] .form-grid textarea { font-size: var(--panel-font); }
+html[data-core-theme] input, html[data-core-theme] select, html[data-core-theme] textarea,
+html[data-core-theme] .form-grid input, html[data-core-theme] .form-grid select, html[data-core-theme] .preview-address-list input { background: var(--surface-strong); color: var(--text); border-color: var(--line-strong); }
+html[data-core-theme] input::placeholder, html[data-core-theme] textarea::placeholder { color: var(--muted); opacity: 1; }
+html[data-core-theme] .form-grid input[readonly], html[data-core-theme] .locked-input-wrap input { background: var(--surface-muted); color: var(--muted); }
+html[data-core-theme] .form-section, html[data-core-theme] .client-card, html[data-core-theme] .checklist-item,
+html[data-core-theme] .validation-card, html[data-core-theme] .advanced-section, html[data-core-theme] .activity-card,
+html[data-core-theme] .tariff-transition-card, html[data-core-theme] .mode-intro-card { background: var(--surface-strong); border-color: var(--line); }
+html[data-core-theme] .client-card-button:hover, html[data-core-theme] .client-card-selected { border-color: var(--accent); box-shadow: none; }
+html[data-core-theme] .progress-track { background: var(--surface-muted); }
+html[data-core-theme] .progress-fill { background: var(--accent-strong); }
+html[data-core-theme] .button-link, html[data-core-theme] .form-actions button, html[data-core-theme] .workflow-actions button,
+html[data-core-theme] .section-head button { background: var(--accent-strong); color: var(--on-accent); border-color: var(--accent-strong); font-size: var(--panel-font); }
+html[data-core-theme] .button-link-muted, html[data-core-theme] .button-secondary { border-color: var(--line-strong) !important; background: var(--surface-muted) !important; color: var(--text) !important; }
+html[data-core-theme] .button-run { background: var(--accent-strong) !important; color: var(--on-accent) !important; }
+html[data-core-theme] .message-error { color: var(--danger); }
+html[data-core-theme] .system-warning-card { background: var(--pending-soft); border-color: var(--pending); }
+html[data-core-theme] .badge-pending { color: var(--pending); background: var(--pending-soft); }
+html[data-core-theme] .badge-ok { color: var(--ok); background: var(--ok-soft); }
+html[data-core-theme] .section-head h2 { font-size: 18px; }
+html[data-core-theme] .operator-cockpit { grid-template-columns: minmax(180px, 1fr) minmax(0, 2.2fr); gap: 12px; }
+html[data-core-theme] .operator-cockpit-main { padding: 14px; }
+html[data-core-theme] .operator-cockpit-main strong { font-size: 16px; }
+html[data-core-theme] .operator-cockpit-main p { font-size: var(--panel-caption); }
+html[data-core-theme] .operator-cockpit-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+html[data-core-theme] .operator-cockpit-grid article { padding: 10px; }
+html[data-core-theme] .operator-cockpit-grid strong { font-size: var(--panel-font); overflow-wrap: anywhere; }
+html[data-core-theme] .operator-cockpit-grid article span { font-size: var(--panel-caption); }
+html[data-core-theme] * { scrollbar-width: none; }
+html[data-core-theme] *::-webkit-scrollbar { width: 0; height: 0; }
+html[data-core-density="compact"] body { --panel-gap: 10px; --panel-pad: 13px; }
+html[data-core-density="compact"] .form-grid { gap: 9px; }
+html[data-core-density="compact"] .form-section { padding: 11px; }
+html[data-core-text-size="large"] body { --panel-font: 15px; --panel-caption: 14px; }
+html[data-core-detail-level="essential"] .core-optional-hint { display: none; }
+html[data-core-reduced-motion="true"] *, html[data-core-reduced-motion="true"] *::before, html[data-core-reduced-motion="true"] *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+@media (max-width: 1000px) { html[data-core-theme] .operator-cockpit { grid-template-columns: 1fr; } html[data-core-theme] .operator-cockpit-grid { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); } }
+@media (max-width: 700px) { html[data-core-theme] .page-shell { padding: 10px 10px 30px; } html[data-core-theme] .operator-strip { flex-wrap: wrap; } }
+@media (max-width: 1050px) { .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 700px) { .form-grid { grid-template-columns: minmax(0, 1fr); } }
+
+/* Match the operator shell without applying any of these settings to a client LMS. */
+html[data-core-theme] body { font-family: var(--ui-font); }
+html[data-core-theme] button, html[data-core-theme] input, html[data-core-theme] textarea, html[data-core-theme] select { font-family: inherit; }
+html[data-core-theme] :is(h1, h2, h3, .compact-hero h1) { font-family: var(--ui-font); letter-spacing: -.025em; }
+html[data-core-theme] .workspace-tabs { background: transparent; border: 0; border-radius: 0; box-shadow: none; gap: 10px; }
+html[data-core-theme] .workspace-tabs > div { display: flex; flex-wrap: wrap; gap: 7px; }
+html[data-core-theme] .workspace-tabs button { min-height: 32px; padding: 7px 12px; border-radius: 6px; }
+html[data-core-theme] .form-section { background: var(--surface); padding: 18px; border-radius: 8px; }
+html[data-core-theme] .form-section-head { border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 16px; }
+html[data-core-theme] .form-section-head strong { font-size: 15px; font-weight: 600; }
+html[data-core-theme] .form-grid { gap: 18px; }
+html[data-core-theme] .form-grid input, html[data-core-theme] .form-grid select { min-height: 36px; border-radius: 6px; padding: 8px 10px; background: var(--bg); }
+html[data-core-theme] .advanced-section { border-radius: 7px; background: var(--surface); }
+html[data-core-theme] .advanced-section > summary { min-height: 40px; font-size: 13px; }
+html[data-core-theme] .client-profile-disclosure { background: var(--surface); }
+html[data-core-theme] .client-brief-summary dt { font-size: var(--panel-caption); }
+html[data-core-theme] .operator-cockpit-main, html[data-core-theme] .operator-cockpit-grid article { background: var(--surface); }
+html[data-core-theme] .checklist-item { padding: 12px; border-radius: 7px; }
+html[data-core-density="compact"] .form-section { padding: 12px; }
+html[data-core-density="compact"] .form-grid { gap: 11px; }

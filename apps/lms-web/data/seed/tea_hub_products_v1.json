@@ -1,0 +1,42 @@
+[
+  {
+    "id": "prod_1780792876793_1",
+    "name": "Те Гуань Инь Ван",
+    "category": "Светлые улуны",
+    "price": "1500",
+    "desc": "Премиальный улун с цветочным ароматом.",
+    "isHit": true,
+    "isHidden": false,
+    "dateAdded": "07.06.2026"
+  },
+  {
+    "id": "prod_1780792876796_2",
+    "name": "35125315",
+    "category": "Аравис",
+    "price": "999",
+    "desc": "иавивапкппквып",
+    "isHit": false,
+    "isHidden": false,
+    "dateAdded": "07.06.2026"
+  },
+  {
+    "id": "prod_1780792876796_3",
+    "name": "45112345",
+    "category": "Бугул",
+    "price": "978",
+    "desc": "авпавпавпвпв",
+    "isHit": false,
+    "isHidden": false,
+    "dateAdded": "07.06.2026"
+  },
+  {
+    "id": "prod_1780792876796_4",
+    "name": "76431453434",
+    "category": "Зелёный",
+    "price": "55555",
+    "desc": "лонепеопекп",
+    "isHit": false,
+    "isHidden": false,
+    "dateAdded": "07.06.2026"
+  }
+]

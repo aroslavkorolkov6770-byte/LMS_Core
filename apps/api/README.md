@@ -1,0 +1,103 @@
+# apps/api
+
+Будущий backend API на `NestJS`.
+
+## Что уже создано
+- `main.ts`
+- `AppModule`
+- глобальный префикс `api`
+- `health` модуль
+- `DatabaseModule`
+- общий db client через `@lms-core/db`
+- каркас модулей:
+  - `Auth`
+  - `Clients`
+  - `Users`
+  - `Courses`
+  - `Tests`
+  - `Documents`
+  - `AI`
+  - `Notifications`
+  - `Exports`
+  - `AdminOps`
+
+## Что дальше
+- подключить `PostgreSQL`
+- подключить `Drizzle`
+- описать сущности и роли
+- добавить `audit_log`
+
+## Что уже стало живее
+- `ClientsModule` уже имеет:
+  - `GET /api/clients/meta`
+  - `GET /api/clients`
+  - `GET /api/clients/features`
+  - `POST /api/clients`
+- `UsersModule` уже имеет:
+  - `GET /api/users/meta`
+  - `GET /api/users`
+  - `GET /api/users/scoped`
+  - `POST /api/users`
+- `DocumentsModule` уже имеет:
+  - `GET /api/documents/meta`
+  - `GET /api/documents`
+  - `GET /api/documents/scoped`
+  - `POST /api/documents`
+- `CoursesModule` уже имеет:
+  - `GET /api/courses/meta`
+  - `GET /api/courses`
+  - `GET /api/courses/scoped`
+  - `POST /api/courses`
+- `TestsModule` уже имеет:
+  - `GET /api/tests/meta`
+  - `GET /api/tests`
+  - `GET /api/tests/scoped`
+  - `POST /api/tests`
+- `ProgressModule` уже имеет:
+  - `GET /api/progress/meta`
+  - `GET /api/progress`
+  - `GET /api/progress/scoped`
+  - `POST /api/progress`
+- `DeadlinesModule` уже имеет:
+  - `GET /api/deadlines/meta`
+  - `GET /api/deadlines`
+  - `GET /api/deadlines/scoped`
+  - `POST /api/deadlines`
+- `AcknowledgementsModule` уже имеет:
+  - `GET /api/acknowledgements/meta`
+  - `GET /api/acknowledgements`
+  - `GET /api/acknowledgements/scoped`
+  - `POST /api/acknowledgements`
+- `NotificationsModule` уже имеет:
+  - `GET /api/notifications/meta`
+  - `GET /api/notifications`
+  - `GET /api/notifications/scoped`
+  - `POST /api/notifications`
+- `ExportsModule` уже имеет:
+  - `GET /api/exports/meta`
+  - `GET /api/exports/client-snapshot`
+- `AdminOpsModule` уже имеет:
+  - `GET /api/admin-ops/meta`
+  - `GET /api/admin-ops/audit-recent`
+- `AiModule` уже имеет:
+  - `GET /api/ai/meta`
+  - `POST /api/ai/ask`
+- `DeployPanelModule` уже имеет:
+  - `GET /api/deploy-panel/meta`
+  - `GET /api/deploy-panel/dashboard`
+  - `GET /api/deploy-panel/client-detail`
+  - `GET /api/deploy-panel/validate-client`
+  - `POST /api/deploy-panel/bootstrap-client`
+  - `POST /api/deploy-panel/update-deploy-profile`
+  - `POST /api/deploy-panel/mark-draft`
+  - `POST /api/deploy-panel/mark-validated`
+  - `POST /api/deploy-panel/mark-ready-to-deploy`
+  - `POST /api/deploy-panel/mark-deployed`
+  - `POST /api/deploy-panel/run-deploy`
+  - `run-deploy` теперь создает локальный bundle в `infra/generated/deployments/<slug>`
+  - `client-detail` теперь отдает LMS source path, Alice tenant/preset и preview theme поля
+- `AuthModule` уже имеет:
+  - `GET /api/auth/meta`
+  - dev auth headers for local work
+  - role-based guard skeleton
+- `AuditModule` уже пишет audit-события для создания клиентов и пользователей

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" fill="none">
+  <defs>
+    <linearGradient id="shell" x1="28" y1="12" x2="220" y2="250" gradientUnits="userSpaceOnUse"><stop stop-color="#243842"/><stop offset="1" stop-color="#0B151D"/></linearGradient>
+    <linearGradient id="top" x1="83" y1="52" x2="176" y2="118" gradientUnits="userSpaceOnUse"><stop stop-color="#FFF0D7"/><stop offset="1" stop-color="#E7B68A"/></linearGradient>
+    <linearGradient id="left" x1="62" y1="90" x2="128" y2="195" gradientUnits="userSpaceOnUse"><stop stop-color="#E7AC77"/><stop offset="1" stop-color="#C08355"/></linearGradient>
+    <linearGradient id="right" x1="191" y1="96" x2="128" y2="197" gradientUnits="userSpaceOnUse"><stop stop-color="#CA9369"/><stop offset="1" stop-color="#8F5D40"/></linearGradient>
+  </defs>
+  <rect x="4" y="4" width="248" height="248" rx="56" fill="url(#shell)"/>
+  <rect x="5" y="5" width="246" height="246" rx="55" stroke="#E5F0F4" stroke-opacity=".15" stroke-width="2"/>
+  <path d="m128 46 66 37-66 38-66-38 66-37Z" fill="url(#top)"/>
+  <path d="m62 83 66 38v75l-66-38V83Z" fill="url(#left)"/>
+  <path d="m194 83-66 38v75l66-38V83Z" fill="url(#right)"/>
+  <path d="m128 88 30 17-30 18-30-18 30-17Z" fill="#243842"/>
+  <path d="M128 124v70" stroke="#FFE6CA" stroke-opacity=".5" stroke-width="2"/>
+  <path d="m63 83 65 38 65-38" stroke="#FFEFD9" stroke-opacity=".42" stroke-width="2"/>
+</svg>

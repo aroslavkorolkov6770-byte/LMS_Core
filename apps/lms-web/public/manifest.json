@@ -1,0 +1,22 @@
+{
+  "name": "LMS Core",
+  "short_name": "LMS Core",
+  "description": "Клиентская LMS-платформа",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0d0f0d",
+  "theme_color": "#0abab5",
+  "gcm_sender_id": "103953800507",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

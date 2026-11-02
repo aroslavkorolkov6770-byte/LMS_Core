@@ -1,0 +1,20 @@
+create table if not exists deploy_profiles (
+  id uuid primary key default gen_random_uuid(),
+  client_id uuid not null unique references clients(id) on delete cascade,
+  host_url text not null,
+  deploy_path text,
+  database_host text not null,
+  database_port integer not null default 5432,
+  database_name text not null,
+  database_user text not null,
+  database_password_secret_ref text,
+  storage_bucket text not null,
+  storage_region text,
+  storage_endpoint text,
+  storage_secret_ref text,
+  ai_provider text not null,
+  ai_model text not null,
+  ai_secret_ref text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);

@@ -1,0 +1,29 @@
+{
+  "name": "@lms-core/db",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "exports": {
+    ".": "./dist/src/index.js"
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "check": "tsc --project tsconfig.json --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:generate:fresh": "tsc --project tsconfig.json && drizzle-kit generate --config drizzle.fresh.config.ts --name core_runtime_v1",
+    "db:push": "drizzle-kit push",
+    "db:seed:roles": "tsx ./src/seed/roles.ts"
+  },
+  "dependencies": {
+    "@lms-core/shared": "workspace:*",
+    "drizzle-orm": "^0.36.4",
+    "postgres": "^3.4.5"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "drizzle-kit": "^0.28.1",
+    "@types/node": "^22.10.1",
+    "typescript": "^5.7.2"
+  }
+}

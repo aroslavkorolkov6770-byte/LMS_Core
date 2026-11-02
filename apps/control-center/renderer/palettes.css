@@ -1,0 +1,59 @@
+/* Shared only by Core and its deploy panel, never by a client LMS. */
+html { --ui-font: "Bahnschrift", "Trebuchet MS", sans-serif; }
+html[data-core-ui-font="humanist"] { --ui-font: "Candara", "Trebuchet MS", sans-serif; }
+html[data-core-ui-font="technical"] { --ui-font: "Bahnschrift", "Trebuchet MS", sans-serif; }
+html[data-core-ui-font="system"] { --ui-font: "Segoe UI", sans-serif; }
+html[data-core-theme], html[data-core-theme] body {
+  --shadow: none;
+  --bg-accent: var(--bg-soft);
+  --ok: var(--accent);
+  --ok-soft: var(--accent-soft);
+  --text-muted: var(--muted);
+  --border: var(--line);
+  --line-strong: color-mix(in srgb, var(--text) 24%, transparent);
+  --surface-muted: color-mix(in srgb, var(--text) 4%, transparent);
+  --accent-soft: color-mix(in srgb, var(--accent) 12%, transparent);
+  --danger-soft: color-mix(in srgb, var(--danger) 12%, transparent);
+  --pending-soft: color-mix(in srgb, var(--pending) 12%, transparent);
+}
+html[data-core-color-scheme="dark"], html[data-core-color-scheme="dark"] body {
+  color-scheme: dark;
+  --line: #ffffff16; --danger: #ffa9ac; --pending: #e8c27e; --on-accent: #10231d;
+}
+html[data-core-color-scheme="light"], html[data-core-color-scheme="light"] body {
+  color-scheme: light;
+  --line: #182b3c24; --danger: #a52c3a; --pending: #805316; --on-accent: #ffffff;
+}
+html[data-core-theme="midnight"], html[data-core-theme="midnight"] body {
+  --bg: #080c12; --bg-soft: #0c121c; --surface: #101821; --surface-strong: #16212c;
+  --text: #e8f0f7; --muted: #9aadc0; --accent: #68dbbc; --accent-strong: #4dceab;
+}
+html[data-core-theme="graphite"], html[data-core-theme="graphite"] body {
+  --bg: #18191c; --bg-soft: #1d1f23; --surface: #222429; --surface-strong: #2b2e34;
+  --text: #f0f0f2; --muted: #b0b1ba; --accent: #c5d0e0; --accent-strong: #b4c3d7;
+}
+html[data-core-theme="ocean"], html[data-core-theme="ocean"] body {
+  --bg: #0b1724; --bg-soft: #102030; --surface: #142638; --surface-strong: #1c3044;
+  --text: #e5f1ff; --muted: #a0b6ce; --accent: #84caff; --accent-strong: #6cbbf2;
+}
+html[data-core-theme="forest"], html[data-core-theme="forest"] body {
+  --bg: #101b18; --bg-soft: #15221c; --surface: #1b2b23; --surface-strong: #23382e;
+  --text: #e5f1e9; --muted: #a3bbab; --accent: #bdd68e; --accent-strong: #aacb79;
+}
+html[data-core-theme="ember"], html[data-core-theme="ember"] body {
+  --bg: #201713; --bg-soft: #281e18; --surface: #30251e; --surface-strong: #3c2f26;
+  --text: #f7eee7; --muted: #c2aea1; --accent: #efb080; --accent-strong: #e8a06a;
+}
+html[data-core-theme="sand"], html[data-core-theme="sand"] body {
+  --bg: #f1ece4; --bg-soft: #eae3d8; --surface: #fbf8f2; --surface-strong: #ffffff;
+  --text: #302921; --muted: #716456; --accent: #256b5c; --accent-strong: #256b5c;
+}
+html[data-core-theme="porcelain"], html[data-core-theme="porcelain"] body {
+  --bg: #f5f6f8; --bg-soft: #e9edf3; --surface: #ffffff; --surface-strong: #f8fafd;
+  --text: #202b3b; --muted: #5c6a7e; --accent: #285fba; --accent-strong: #285fba;
+}
+html[data-core-theme="mist"], html[data-core-theme="mist"] body {
+  --bg: #edf3f0; --bg-soft: #e0eae3; --surface: #fafdfb; --surface-strong: #ffffff;
+  --text: #20382d; --muted: #596f63; --accent: #326e46; --accent-strong: #326e46;
+}
+html[data-core-border-contrast="strong"], html[data-core-border-contrast="strong"] body { --line: color-mix(in srgb, var(--text) 30%, transparent); --line-strong: color-mix(in srgb, var(--text) 42%, transparent); }

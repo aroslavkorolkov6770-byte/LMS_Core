@@ -1,0 +1,51 @@
+const fs = require("node:fs/promises");
+const path = require("node:path");
+const assert = require("node:assert/strict");
+const { randomUUID } = require("node:crypto");
+const { ClientDesignService } = require("../../apps/control-center/dist/client-design.js");
+const { buildInstallationPackage } = require("../scripts/build-lms-installation.cjs");
+const { storeImage } = require("../scripts/client-brand-assets.cjs");
+const { fixtureImage } = require("../../apps/control-center/tests/branding-image-fixture.cjs");
+const { DEFAULT_CLIENT_PREVIEW_ELEMENT_OVERRIDE } = require("../../packages/shared/dist/index.js");
+const root = path.resolve(__dirname, "../..");
+
+(async () => {
+  const sourceId = process.env.CORE_TEST_LMS_SOURCE_ID;
+  assert.match(sourceId || "", /^[a-f0-9-]{36}$/);
+  const response = await fetch("http://127.0.0.1:3001/api/deploy-panel/preview-settings?clientId=ffe5afda-f49c-4518-9dea-429dca1dbf1e", { signal: AbortSignal.timeout(10000) });
+  assert.equal(response.status, 200);
+  const baseline = (await response.json()).settings;
+  const output = path.join(root, "infra/runtime/local-acceptance/design-packages-20261029", randomUUID());
+  await fs.mkdir(output, { recursive: true });
+  const packages = [];
+  for (const [label, primary, font] of [["Альфа", "#286f94", "Georgia"], ["Бета", "#a44327", "Verdana"]]) {
+    const clientId = randomUUID(), settings = structuredClone(baseline);
+    settings.theme.primary = primary; settings.theme.button = primary; settings.theme.background = "#f2f3f5"; settings.theme.surface = "#ffffff";
+    settings.theme.text = "#172033"; settings.theme.muted = "#526174"; settings.theme.buttonText = "#ffffff";
+    settings.typography.headingFont = font; settings.typography.bodyFont = font; settings.typography.buttonFont = font;
+    settings.typography.buttonRadiusPx = 12;
+    settings.content.homeTitle = `Платформа ${label}`; settings.content.homeSubtitle = `Только материалы клиента ${label}`;
+    settings.content.loginTitle = `Вход ${label}`; settings.content.loginButtonLabel = `Войти ${label}`;
+    settings.content.profileTitle = `Профиль ${label}`; settings.content.adminTitle = `Управление ${label}`;
+    settings.content.navHomeLabel = `Главная ${label}`; settings.content.navProfileLabel = `Мой профиль ${label}`;
+    settings.content.cancelLabel = `Отмена ${label}`; settings.content.learningUrgentEmptyText = `Нет срочных заданий ${label}`;
+    settings.content.learningDefaultSectionLabel = `Основной раздел ${label}`;
+    const image = await storeImage(root, clientId, fixtureImage(primary, 640, 320));
+    settings.content.homeBackgroundImageUrl = image.url;
+    settings.layout.density = label === "Альфа" ? "compact" : "spacious";
+    settings.layout.cardRadiusPx = label === "Альфа" ? 18 : 26;
+    settings.layout.sectionGapPx = label === "Альфа" ? 18 : 42;
+    settings.components.buttonShadow = label !== "Альфа"; settings.components.smoothTabs = label !== "Альфа";
+    settings.elementOverrides["home.title"] = { ...DEFAULT_CLIENT_PREVIEW_ELEMENT_OVERRIDE, offsetX: 14, offsetY: 3, paddingPx: 8, textColor: "#834322", align: "left", widthPercent: 88 };
+    settings.elementOverrides["profile.subtitle"] = { ...DEFAULT_CLIENT_PREVIEW_ELEMENT_OVERRIDE, visible: label === "Альфа" };
+    const service = new ClientDesignService(root, async (id) => ({ client: { id, name: label, brandName: `Клиент ${label}` } }), async (id) => ({ clientId: id, source: "saved", settings }));
+    const design = await service.capture(clientId);
+    const artifact = await buildInstallationPackage(sourceId, design.id);
+    assert.equal(artifact.design.clientId, clientId); assert.equal(artifact.design.sha256, design.sha256);
+    packages.push({ label, clientId, primary, font, artifact });
+  }
+  assert.notEqual(packages[0].artifact.design.sha256, packages[1].artifact.design.sha256);
+  assert.equal(packages[0].artifact.revision, packages[1].artifact.revision);
+  await fs.writeFile(path.join(output, "receipt.json"), JSON.stringify({ checkedAt: new Date().toISOString(), sourceId, packages, realCoreWrites: 0, externalActions: false }, null, 2));
+  console.log(JSON.stringify({ output, packages: packages.map(({ label, clientId, artifact }) => ({ label, clientId, packageId: artifact.id, designHash: artifact.design.sha256, textKeys: artifact.design.supportedTextKeys })) }));
+})().catch((error) => { console.error(error.stack || error.message); process.exitCode = 1; });

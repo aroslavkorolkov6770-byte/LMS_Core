@@ -1,0 +1,148 @@
+const { chromium } = require("playwright");
+const fs = require("node:fs/promises");
+const path = require("node:path");
+const http = require("node:http");
+const assert = require("node:assert/strict");
+const { randomUUID } = require("node:crypto");
+const { isolatedNext, listen } = require("./isolated-next.cjs");
+const root = path.resolve(__dirname, "../..");
+const output = path.join(root, "infra/runtime/local-acceptance/client-site-20261029", randomUUID());
+const clientId = "ffe5afda-f49c-4518-9dea-429dca1dbf1e";
+
+(async () => {
+  await fs.mkdir(output, { recursive: true });
+  const headers = { "x-dev-role-code": "system_admin", "x-dev-user-id": "acceptance-read-only", "x-dev-client-id": "acceptance-read-only" };
+  async function readApi(endpoint) { const response = await fetch(`http://127.0.0.1:3001/api/deploy-panel/${endpoint}?clientId=${clientId}`, { headers, signal: AbortSignal.timeout(10000) }); assert.equal(response.status, 200); return response.json(); }
+  const detail = await readApi("client-detail"), saved = await readApi("preview-settings");
+  const longText = "Длинный сохраненный текст ".repeat(720), originalSubtitle = saved.settings.content.homeSubtitle;
+  saved.settings.content.homeTitle = "Saved view fixture";
+  saved.settings.content.homeSubtitle = longText;
+  saved.settings.content.tasksDashboardTitle = "Saved tasks fixture";
+  saved.settings.components.showHomeCta = true;
+  saved.settings.theme.primary = "#3478c2";
+  saved.settings.typography.headingFont = "Georgia";
+  saved.settings.content.homeBackgroundImageUrl = "/__acceptance_backdrop.svg";
+  const secondId = randomUUID();
+  const otherDetail = structuredClone(detail); otherDetail.client.id = secondId;
+  const otherSaved = structuredClone(saved); otherSaved.clientId = secondId; otherSaved.settings.content.homeTitle = "Second saved fixture"; otherSaved.settings.theme.primary = "#9a5d23";
+  const actualWrites = [];
+  const backend = http.createServer((request, response) => {
+    const url = new URL(request.url, "http://localhost"), second = url.searchParams.get("clientId") === secondId;
+    if (request.method !== "GET") { actualWrites.push(url.pathname); response.writeHead(405); return response.end(); }
+    response.writeHead(200, { "Content-Type": "application/json" });
+    response.end(JSON.stringify(url.pathname.endsWith("client-detail") ? second ? otherDetail : detail : second ? otherSaved : saved));
+  });
+  let isolated, browser;
+  try {
+    const backendPort = await listen(backend);
+    isolated = await isolatedNext(root, "lms-web", output, `http://127.0.0.1:${backendPort}`);
+    browser = await chromium.launch({ executablePath: process.env.CORE_TEST_BROWSER || "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe", headless: true });
+    const context = await browser.newContext({ viewport: { width: 1500, height: 1000 } });
+    const mutations = [], errors = [], hydrationErrors = [];
+    let missingHandshake = false;
+    await context.addInitScript((clientId) => { localStorage.setItem(`lms-preview-control:${clientId}`, JSON.stringify({ selectMode: true, dragMode: true, selectedId: "home.title", textEditableIds: ["home.title"] })); }, clientId);
+    await context.route("**/*", async (route) => {
+      const request = route.request(), url = new URL(request.url());
+      if (["http:", "https:"].includes(url.protocol) && url.origin !== isolated.origin) return route.abort();
+      if (!["GET", "HEAD", "OPTIONS"].includes(request.method())) { mutations.push(url.pathname); return route.abort(); }
+      if (url.pathname === "/__acceptance_backdrop.svg") return route.fulfill({ status: 200, contentType: "image/svg+xml", body: '<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="1000"><defs><linearGradient id="g"><stop stop-color="#235863"/><stop offset="1" stop-color="#77624b"/></linearGradient></defs><path fill="url(#g)" d="M0 0h1500v1000H0z"/><circle cx="1260" cy="240" r="430" fill="#93aa9b" opacity=".2"/></svg>' });
+      if (url.pathname === "/api/storage") {
+        const value = (key) => key.startsWith("profile_data_") ? { avatar: "", tg: "", phone: "", email: "", firstLogin: "2026-01-01T00:00:00Z" } : [];
+        const keys = url.searchParams.get("keys");
+        return route.fulfill({ status: 200, json: keys ? Object.fromEntries(keys.split(",").map((key) => [key, value(key)])) : value(url.searchParams.get("key") || "") });
+      }
+      if (missingHandshake && url.pathname === "/" && url.searchParams.get("previewReadonly") === "1" && request.isNavigationRequest()) return route.fulfill({ status: 200, contentType: "text/html", body: "<!doctype html><html><body>Local missing handshake fixture.</body></html>" });
+      return route.continue();
+    });
+    const page = await context.newPage();
+    page.on("pageerror", (error) => errors.push(error.message));
+    page.on("console", (message) => { if (message.type() === "error" && /hydrat|server rendered|didn't match/i.test(message.text())) hydrationErrors.push(message.text().split("\n")[0]); });
+    const siteUrl = `${isolated.origin}/client/${clientId}`;
+    const openedAt = Date.now();
+    await page.goto(siteUrl, { waitUntil: "domcontentloaded" });
+    const frame = page.frameLocator(".client-site-frame");
+    await page.locator(".client-site-cover").waitFor({ state: "hidden", timeout: 45000 });
+    const firstViewReadyMs = Date.now() - openedAt;
+    const source = await page.locator(".client-site-frame").getAttribute("src");
+    assert.ok(source.length < 350); assert.ok(!source.includes("previewHomeSubtitle"));
+    assert.equal(new URL(page.url()).pathname, `/client/${clientId}`); assert.equal(new URL(page.url()).search, "");
+    assert.equal(await frame.locator('[data-preview-editable="home.title"]').textContent(), "Saved view fixture");
+    assert.equal(await frame.locator('[data-preview-editable="home.subtitle"]').textContent(), longText);
+    assert.equal(await frame.locator("#lms-preview-runtime-bridge-style").count(), 0);
+    assert.equal(await frame.locator("body").getAttribute("data-preview-select-mode"), null);
+    const contentWidth = await frame.locator(".home-main").evaluate((element) => Math.round(element.getBoundingClientRect().width));
+    assert.equal(contentWidth, 1200, "The desktop content width must not shrink with a short headline");
+    const bounds = await page.locator(".client-site-frame").boundingBox(); assert.equal(bounds.width, 1500); assert.equal(bounds.height, 1000);
+    await frame.locator(".guest-header > div").click();
+    await frame.locator(".auth-modal").getByPlaceholder("Логин", { exact: true }).fill("unsent-fixture-login");
+    await frame.locator(".auth-modal").getByText("ОТМЕНА", { exact: true }).click();
+    await frame.locator(".auth-modal").waitFor({ state: "hidden" });
+    await frame.locator('[data-preview-editable="home.cta"] a').click();
+    await frame.locator('[data-preview-editable="tasks.dashboardTitle"]').filter({ hasText: "Saved tasks fixture" }).waitFor();
+    assert.equal(await frame.locator("body").evaluate(() => new URLSearchParams(location.search).get("previewReadonly")), "1");
+    assert.equal(await frame.locator("#lms-preview-runtime-bridge-style").count(), 0);
+    await frame.locator("body").evaluate(() => location.assign(`/profile${location.search}`));
+    await frame.locator(".settings-btn").waitFor();
+    await page.locator(".client-site-cover").waitFor({ state: "hidden" });
+    await frame.locator(".settings-btn").click();
+    await frame.getByText("Выйти из аккаунта", { exact: true }).click();
+    await frame.locator('[data-preview-editable="home.title"]').filter({ hasText: "Saved view fixture" }).waitFor();
+    assert.equal(await frame.locator("body").evaluate(() => new URLSearchParams(location.search).get("previewReadonly")), "1");
+    const editor = await context.newPage();
+    await editor.goto(`${isolated.origin}/preview?clientId=${clientId}`, { waitUntil: "domcontentloaded" });
+    await editor.locator(".frame-status").filter({ hasText: "Готово" }).waitFor();
+    await editor.locator(".field").filter({ has: editor.locator("label", { hasText: /^Главный заголовок$/ }) }).locator("input").fill("Unsent editor-only fixture");
+    await editor.frameLocator(".runtime-frame").locator('[data-preview-editable="home.title"]').filter({ hasText: "Unsent editor-only fixture" }).waitFor();
+    assert.equal(await frame.locator('[data-preview-editable="home.title"]').textContent(), "Saved view fixture");
+    assert.equal(await frame.locator("#lms-preview-runtime-bridge-style").count(), 0);
+    await editor.close();
+    const second = await context.newPage();
+    await second.goto(`${isolated.origin}/client/${secondId}`, { waitUntil: "domcontentloaded" });
+    await second.locator(".client-site-cover").waitFor({ state: "hidden" });
+    assert.equal(await second.frameLocator(".client-site-frame").locator('[data-preview-editable="home.title"]').textContent(), "Second saved fixture");
+    assert.equal(await frame.locator('[data-preview-editable="home.title"]').textContent(), "Saved view fixture");
+    await second.close();
+    const resource = `/__client_resource_${randomUUID()}`;
+    await context.route(`${isolated.origin}${resource}`, (route) => route.fulfill({ status: 200, contentType: "text/plain", body: "Local view-only document fixture." }));
+    await page.locator(".client-site-frame").evaluate((iframe, resource) => { iframe.src = resource; }, resource);
+    await frame.locator("body").filter({ hasText: "Local view-only document fixture." }).waitFor();
+    assert.equal(await page.locator(".client-site-cover").count(), 0);
+    missingHandshake = true;
+    const timeoutStarted = Date.now();
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await page.getByRole("button", { name: "Повторить загрузку", exact: true }).waitFor({ timeout: 40000 });
+    const loadingTimeoutMs = Date.now() - timeoutStarted;
+    missingHandshake = false;
+    await page.getByRole("button", { name: "Повторить загрузку", exact: true }).click();
+    await page.locator(".client-site-cover").waitFor({ state: "hidden", timeout: 45000 });
+    assert.equal(await frame.locator('[data-preview-editable="home.title"]').textContent(), "Saved view fixture");
+    saved.settings.content.homeSubtitle = originalSubtitle;
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await page.locator(".client-site-cover").waitFor({ state: "hidden" });
+    await frame.locator("body").evaluate(async () => {
+      const animations = document.getAnimations().filter((animation) => animation.effect?.getTiming().iterations !== Infinity);
+      await Promise.all(animations.map((animation) => animation.finished.catch(() => {})));
+    });
+    await page.screenshot({ path: path.join(output, "saved-site.png"), caret: "initial" });
+    const mobile = await context.newPage();
+    mobile.on("pageerror", (error) => errors.push(error.message));
+    await mobile.setViewportSize({ width: 390, height: 844 });
+    await mobile.goto(siteUrl, { waitUntil: "domcontentloaded" });
+    await mobile.locator(".client-site-cover").waitFor({ state: "hidden" });
+    const mobileFrame = mobile.frameLocator(".client-site-frame");
+    const mobileBounds = await mobile.locator(".client-site-frame").boundingBox();
+    assert.equal(mobileBounds.width, 390); assert.equal(mobileBounds.height, 844);
+    const horizontalOverflow = await mobileFrame.locator("body").evaluate(() => Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth);
+    assert.ok(horizontalOverflow <= 1, "Saved view must not require horizontal scrolling at 390px");
+    await mobileFrame.locator("body").evaluate(async () => { await Promise.all(document.getAnimations().filter((animation) => animation.effect?.getTiming().iterations !== Infinity).map((animation) => animation.finished.catch(() => {}))); });
+    await mobile.screenshot({ path: path.join(output, "saved-site-390px.png"), caret: "initial" });
+    assert.deepEqual(actualWrites, []); assert.deepEqual(mutations, []); assert.deepEqual(errors, []); assert.deepEqual(hydrationErrors, []);
+    const result = { checkedAt: new Date().toISOString(), realProductionUi: true, buildMs: isolated.buildMs, firstViewReadyMs, parentShortAddress: true, savedTextCharacters: longText.length, frameUrlCharacters: source.length, fullscreen1500x1000: true, contentWidth, mobile390x844NoHorizontalOverflow: true, noEditorControlsOrStorageBleed: true, loginModalClickable: true, internalNavigationRetainsDesign: true, profileLogoutRetainsClientContext: true, unsavedEditorAndOtherClientIsolated: true, documentViewWorks: true, loadingTimeoutMs, retryRecovers: true, realBackendWrites: 0, blockedMutations: mutations, errors, hydrationErrors };
+    await fs.writeFile(path.join(output, "receipt.json"), JSON.stringify(result, null, 2));
+    console.log(JSON.stringify({ ...result, output }));
+  } finally {
+    if (browser) await browser.close();
+    if (isolated) await isolated.cleanup();
+    backend.closeAllConnections(); await new Promise((resolve) => backend.close(resolve));
+  }
+})().catch((error) => { console.error(error.stack || error.message); process.exitCode = 1; });

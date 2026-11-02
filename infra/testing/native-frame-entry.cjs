@@ -1,0 +1,10 @@
+const path = require("node:path");
+const { app } = require("electron");
+const root = path.resolve(__dirname, "../..");
+const profile = path.resolve(process.env.CORE_TEST_NATIVE_PROFILE || "");
+const relative = path.relative(path.join(root, "infra/runtime/local-acceptance"), profile);
+if (!/^(?:native-frame|interface|startup)-20261029[\\/][a-f0-9-]{36}[\\/]profile$/i.test(relative)) throw new Error("Refusing an unowned native test profile");
+app.setName(require(path.join(root, "apps/control-center/package.json")).name);
+app.setPath("userData", profile);
+require("./native-probe-hook.cjs");
+require(path.join(root, "apps/control-center/dist/main.js"));

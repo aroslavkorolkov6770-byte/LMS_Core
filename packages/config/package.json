@@ -1,0 +1,8 @@
+{
+  "name": "@lms-core/config",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "check": "echo Config package placeholder"
+  }
+}

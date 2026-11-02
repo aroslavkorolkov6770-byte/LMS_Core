@@ -1,0 +1,45 @@
+node_modules
+.pnpm-store
+dist
+.next
+coverage
+.turbo
+.env
+.env.local
+.env.*.local
+!.env.example
+*.log
+apps/control-center/config/launcher-secrets.json
+apps/control-center/config/launcher-config.json
+infra/private-storage/
+infra/backups/
+infra/generated/
+infra/local-postgres/
+infra/runtime/
+infra/runtime-logs/
+/apps/lms-web/data/*.json
+*.tsbuildinfo
+
+# Local build output and development tools.
+.next-*/
+/dist-installers/
+.tmp/
+.codex/
+.agents/
+
+# Environment files are private; commit only explicit templates.
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.sqlite
+*.sqlite3
+
+# One-time maintenance scripts bound to the owner's historical deployments.
+/infra/maintenance/inspect-installation-20261031.cjs
+/infra/maintenance/inspect-running-installation-20261031.cjs
+/infra/maintenance/normalize-installation-domain-20261031.cjs
+/infra/maintenance/remove-approved-legacy-lms-20261101.cjs

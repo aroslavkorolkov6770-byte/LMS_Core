@@ -1,0 +1,6 @@
+FROM ubuntu:24.04@sha256:24737cef17f4e22b1977df7d9a05e77c4e28b7da5b8911f8d8ccda136bf3573c
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends systemd systemd-sysv openssh-server ca-certificates util-linux xz-utils libstdc++6 && rm -rf /var/lib/apt/lists/*
+COPY wsl.conf /etc/wsl.conf
+RUN systemctl enable ssh && mkdir -p /run/sshd
+CMD ["/sbin/init"]

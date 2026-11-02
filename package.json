@@ -1,0 +1,17 @@
+{
+  "name": "lms-core",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@9.12.3",
+  "scripts": {
+    "build:shared": "pnpm --dir packages/shared build",
+    "build:db": "pnpm --dir packages/db build",
+    "dev:api": "pnpm --dir apps/api dev",
+    "dev:lms-web": "pnpm --dir apps/lms-web dev",
+    "dev:deploy-panel": "pnpm --dir apps/deploy-panel dev",
+    "dev:control-center": "pnpm --dir apps/control-center dev",
+    "check": "pnpm -r check",
+    "db:generate": "pnpm --dir packages/db db:generate",
+    "db:seed:roles": "pnpm --dir packages/db db:seed:roles"
+  }
+}

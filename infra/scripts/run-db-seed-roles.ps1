@@ -1,0 +1,2 @@
+$env:DATABASE_URL = "postgresql://postgres@127.0.0.1:55432/lms_core"
+pnpm db:seed:roles

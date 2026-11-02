@@ -1,0 +1,27 @@
+{
+  "name": "@lms-core/control-center",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "check": "tsc --project tsconfig.json --noEmit",
+    "test:launcher": "pnpm run build && node tests/service-lifecycle.cjs",
+    "test:health": "pnpm run build && node --test tests/health-and-logs.test.cjs",
+    "test:repository": "pnpm run build && node --test tests/repository.test.cjs",
+    "test:sources": "pnpm run build && node --test tests/source-snapshots.test.cjs",
+    "test:remote": "pnpm run build && node --test tests/remote-target.test.cjs",
+    "test:preflight": "pnpm run build && node --test tests/update-preflight.test.cjs",
+    "dev": "pnpm run build && electron .",
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "electron": "^37.2.0"
+  },
+  "dependencies": {
+    "playwright-core": "1.62.1",
+    "ssh2": "1.17.0",
+    "typescript": "^5.8.3"
+  }
+}

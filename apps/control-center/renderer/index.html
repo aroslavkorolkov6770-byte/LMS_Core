@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; frame-src http: https: about:; connect-src 'self' http://127.0.0.1:* http://localhost:*; object-src 'none'; base-uri 'none'" />
+    <title>LMS Core Центр управления</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./palettes.css" />
+    <link rel="stylesheet" href="./workspace.css" />
+    <link rel="stylesheet" href="./core-ui.css" />
+    <link rel="stylesheet" href="./deployment-workflow.css" />
+  </head>
+  <body data-theme="midnight">
+    <div class="app-shell">
+      <aside class="side-rail">
+        <div class="side-brand">
+          <img class="brand-mark" src="./assets/core-mark.svg" alt="" aria-hidden="true" />
+          <div class="brand-copy">
+            <strong>LMS Core</strong>
+            <span class="optional-hint">Управление платформой</span>
+          </div>
+        </div>
+
+        <nav class="section-nav" aria-label="Разделы ядра">
+          <span class="rail-label">Управление</span>
+          <button class="nav-button is-current" data-view-target="overview"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 7-5 5 5 5m8-10 5 5-5 5m-3-13-2 16"/></svg>Источники кода</button>
+          <button class="nav-button" data-view-target="services"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="7" rx="2"/><rect x="3" y="14" width="18" height="7" rx="2"/><path d="M7 6.5h.01M7 17.5h.01"/></svg>Сервисы</button>
+          <button class="nav-button" data-view-target="browser"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2M17 5a3 3 0 0 1 0 6m2 9v-2a6 6 0 0 0-2-4"/></svg>Клиенты</button>
+          <button class="nav-button" data-view-target="lms"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M7 6.5h.01M10 6.5h.01m0 7 4 2-4 2v-4Z"/></svg>LMS</button>
+          <button class="nav-button" data-view-target="database"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v7c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12v7c0 1.7 3.6 3 8 3s8-1.3 8-3v-7"/></svg>База данных</button>
+          <button class="nav-button" data-view-target="repository"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="7" cy="5" r="3"/><circle cx="17" cy="6" r="3"/><circle cx="7" cy="19" r="3"/><path d="M7 8v8M17 9v1a5 5 0 0 1-5 5H7"/></svg>Репозиторий</button>
+          <span class="rail-label rail-label-secondary">Система</span>
+          <button class="nav-button" data-view-target="logs"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5"/></svg>Журнал</button>
+          <button class="nav-button" data-view-target="settings"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 17h16M8 4v6M16 14v6"/><circle cx="8" cy="7" r="2"/><circle cx="16" cy="17" r="2"/></svg>Настройки</button>
+        </nav>
+
+        <div class="rail-footer">
+          <div class="rail-status" aria-live="polite">
+            <span class="rail-status-indicator" aria-hidden="true"></span>
+            <div><strong>Исправны сервисы <span id="stat-services-online">0/0</span></strong><span id="summary-text">Проверка...</span></div>
+          </div>
+          <button id="refresh-button" class="button-secondary rail-action-button">Обновить статусы</button>
+          <section id="diagnostics-panel" class="diagnostics-panel"><p id="diagnostics-text" aria-live="polite">Инициализация...</p></section>
+        </div>
+      </aside>
+
+      <main class="main-stage">
+        <header class="app-header">
+          <div class="header-title-block">
+            <h1 id="workspace-title">Источники кода</h1>
+            <p class="optional-hint">Управление LMS Core</p>
+          </div>
+
+          <div class="header-actions">
+            <span id="execution-mode-caption" class="header-state-note"><span class="header-status-dot" aria-hidden="true"></span>Локальный контур</span>
+          </div>
+        </header>
+
+        <section id="view-overview" class="workspace-view is-current">
+          <div class="source-library-workspace">
+            <div class="source-library-heading"><div><h2>Код ваших проектов</h2><p id="source-library-count">Загрузка источников...</p></div><button id="source-library-add" class="source-add-button" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Добавить источник</button></div>
+            <p id="source-library-feedback" class="source-library-feedback" role="status" aria-live="polite"></p>
+            <form id="source-library-form" class="source-library-editor hidden">
+              <div class="source-editor-heading"><h3 id="source-library-form-title">Новый источник</h3><button id="source-library-cancel" class="source-icon-button button-secondary" type="button" aria-label="Закрыть форму источника"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+              <div class="source-editor-fields"><label class="settings-field"><span>Название</span><input id="source-library-name" maxlength="80" required placeholder="Например, LMS для кофеен" /></label><label class="settings-field"><span>Ветка</span><input id="source-library-branch" maxlength="255" placeholder="Основная ветка репозитория" /></label><label class="settings-field source-field-wide"><span>SSH-адрес репозитория</span><input id="source-library-url" maxlength="2048" required placeholder="git@github.com:owner/project.git" spellcheck="false" /></label><label class="settings-field source-field-wide"><span>Заметка для себя</span><textarea id="source-library-note" maxlength="1000" rows="3" placeholder="Для какого проекта используется этот код"></textarea></label></div>
+              <div class="source-editor-actions"><span id="source-library-form-error" role="alert"></span><button id="source-library-save" type="submit">Сохранить источник</button></div>
+            </form>
+            <div id="source-library-list" class="source-library-grid"></div>
+            <div id="source-library-empty" class="source-library-empty hidden"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 7-5 5 5 5m8-10 5 5-5 5m-3-13-2 16"/></svg><h3>Здесь будут ваши источники</h3><p>Добавьте репозиторий и короткую заметку к нему.</p></div>
+            <button id="source-library-retry" class="button-secondary hidden" type="button">Повторить загрузку</button>
+          </div>
+        </section>
+
+        <section id="view-repository" class="workspace-view">
+          <div class="content-stack repository-workspace">
+            <section class="repository-heading">
+              <div><span class="overview-eyebrow">ИСТОЧНИК КОДА LMS</span><h2>Откуда брать код</h2><p class="surface-copy">Репозиторий и ветку можно заменить. Получатель — сервер выбранного клиента, а не GitHub.</p></div>
+              <span class="repository-readonly-label">Только чтение</span>
+            </section>
+            <section class="content-panel">
+              <form id="repository-form" class="repository-form">
+                <label class="settings-field repository-wide"><span>Адрес репозитория, не SSH-ключ</span><input id="repository-url" type="text" placeholder="git@github.com:owner/repository.git" autocomplete="off" spellcheck="false" required /><small class="repository-field-help">GitHub → Code → SSH → адрес вида git@github.com:owner/repository.git. Строка ssh-ed25519 вводится только в GitHub Deploy keys.</small></label>
+                <label class="settings-field"><span>Ветка</span><input id="repository-branch" type="text" placeholder="Основная ветка репозитория" list="repository-branches" autocomplete="off" spellcheck="false" /><datalist id="repository-branches"></datalist></label>
+                <label class="settings-field"><span>SSH-ключ</span><select id="repository-identity-mode"><option value="default">Стандартный ключ OpenSSH / агент</option><option value="managed">Отдельный защищенный ключ Core</option><option value="file">Выбрать существующий файл ключа</option></select></label>
+                <div id="repository-file-row" class="repository-wide repository-file-row hidden"><label class="settings-field"><span>Файл приватного ключа</span><input id="repository-identity-file" type="text" readonly placeholder="Выберите файл на этом компьютере" /></label><button id="repository-choose-key" type="button" class="button-secondary">Выбрать файл</button></div>
+                <div class="repository-form-actions repository-wide"><span>Приватный ключ и пароль в форму не вводятся.</span><button id="repository-check" type="submit">Сохранить и проверить</button></div>
+              </form>
+              <div id="repository-feedback" class="repository-feedback" role="status" aria-live="polite">Подключение еще не проверялось.</div>
+              <details class="repository-check-details"><summary>Результат проверки доступа</summary><dl class="repository-result-grid">
+                <div><dt>Последняя проверка</dt><dd id="repository-checked-at">Не выполнялась</dd></div>
+                <div><dt>Основная ветка</dt><dd id="repository-default-branch">Не определена</dd></div>
+                <div><dt>Выбранная ветка</dt><dd id="repository-selected-branch">Не определена</dd></div>
+                <div><dt>Версия (commit)</dt><dd id="repository-revision">Не получена</dd></div>
+              </dl></details>
+            </section>
+            <section class="content-panel source-version-panel">
+              <div class="panel-topline"><strong>Версия кода из GitHub</strong><button id="source-fetch-button" type="button">Получить код</button></div>
+              <p id="source-fetch-feedback" class="surface-copy" role="status" aria-live="polite">Код из Git еще не получен.</p>
+              <p id="source-fetch-version" class="source-version-meta"></p>
+              <details id="source-details" class="hidden"><summary>Состав версии и ограничения перед установкой</summary><p id="source-fetch-path" class="source-version-meta"></p><ul id="source-fetch-warnings"></ul></details>
+            </section>
+            <section class="content-panel repository-target-panel">
+              <div class="panel-topline"><strong>Куда устанавливать LMS</strong><button id="repository-choose-client" class="button-secondary" type="button">Выбрать клиента</button></div>
+              <p id="repository-target-feedback" class="surface-copy" role="status" aria-live="polite">Выберите клиента, чтобы увидеть настройки его серверов.</p>
+              <p class="repository-current-client">Клиент: <strong id="repository-target-client">Не выбран</strong></p>
+              <dl id="repository-target-legacy-summary" class="repository-result-grid hidden">
+                <div><dt>Адрес LMS из профиля</dt><dd id="repository-target-host">Не задан</dd></div>
+                <div><dt>Папка установки на сервере</dt><dd id="repository-target-path">Не задана</dd></div>
+                <div><dt>Сервер БД из профиля</dt><dd id="repository-target-database">Не задан</dd></div>
+              </dl>
+              <div class="repository-target-actions"><button id="repository-configure-target" type="button" class="button-secondary" disabled>Настроить серверы клиента</button><button id="repository-refresh-target" type="button" class="button-secondary" disabled>Обновить профиль</button></div>
+              <p class="repository-boundary-note">Получение исходников не устанавливает сайт. SSH-доступ, сборка и проверка запуска на сервере выполняются отдельными этапами.</p>
+              <details id="remote-connection-details" class="remote-connection-details" open>
+                <summary>Установка LMS и SSH-сервер</summary>
+                <nav class="deployment-steps" aria-label="Шаги установки LMS">
+                  <button type="button" data-deploy-stage="connection" aria-current="step"><span>1</span><strong>Подключение</strong><small>Сервер и SSH</small></button>
+                  <button type="button" data-deploy-stage="preparation"><span>2</span><strong>Подготовка</strong><small>Пакет и проверки</small></button>
+                  <button type="button" data-deploy-stage="installation"><span>3</span><strong>Установка</strong><small>Доступы и запуск</small></button>
+                  <button type="button" data-deploy-stage="access"><span>4</span><strong>Открыть LMS</strong><small>Результат и адрес</small></button>
+                </nav>
+                <p id="deployment-next-step" class="deployment-next-step" role="status">Выберите клиента и укажите SSH-сервер.</p>
+                <div class="deployment-workspace">
+                <form id="remote-target-form" class="repository-form">
+                  <section data-deploy-pane="connection" class="deployment-pane repository-wide">
+                  <div class="deployment-pane-heading"><h3>Подключение к серверу</h3><p>Сохраните адрес и независимо подтвердите отпечаток SSH.</p></div>
+                  <div class="repository-grid">
+                  <label class="settings-field repository-wide"><span>Режим работы</span><select id="remote-operation-mode"><option value="new">Новая установка клиента</option><option value="update">Обновление существующей LMS</option></select></label>
+                  <p id="remote-mode-note" class="repository-wide repository-field-help">Для новой установки путь рассчитывается из кода клиента. Существующий сайт не заменяется.</p>
+                  <label class="settings-field"><span>IP / имя SSH-сервера</span><input id="remote-host" type="text" placeholder="Адрес сервера" autocomplete="off" required /></label>
+                  <label class="settings-field"><span>SSH-порт</span><input id="remote-port" type="number" min="1" max="65535" value="22" required /></label>
+                  <label class="settings-field"><span>SSH-пользователь</span><input id="remote-username" type="text" placeholder="Пользователь" autocomplete="off" required /></label>
+                  <label class="settings-field"><span>Базовый каталог новых установок</span><input id="remote-base-path" type="text" placeholder="/srv/lms-core/clients" required /></label>
+                  <label id="remote-app-path-row" class="settings-field repository-wide hidden"><span>Каталог существующей LMS для обновления</span><input id="remote-app-path" type="text" placeholder="Путь из SSH-инвентаризации" /><small class="repository-field-help">Обновляется отдельная существующая установка. Её папку data и окружение нельзя заменять файлами пилота.</small></label>
+                  <div id="new-installation-destination" class="repository-wide installation-destination"><span>Папка нового клиента</span><strong id="new-installation-auto-path">Сначала выберите клиента</strong><small>Core создаст её на этапе установки; вручную готовить каталог не нужно.</small></div>
+                  <div class="repository-wide remote-public-actions"><button id="remote-save-button" type="button" class="button-secondary">Сохранить SSH-параметры</button><button id="remote-probe-button" type="button" class="button-secondary">Получить отпечаток сервера</button></div>
+                  <label class="settings-field repository-wide"><span>Подтверждённый отпечаток из консоли хостера</span><input id="remote-fingerprint" type="text" placeholder="SHA256:…" spellcheck="false" autocomplete="off" /><small class="repository-field-help">Сначала сверьте отпечаток независимо. Он не подставляется автоматически из сетевого ответа.</small></label>
+                  <label class="settings-field"><span>Способ SSH-входа</span><select id="remote-auth-mode"><option value="password">Пароль сервера</option><option value="key">Файл приватного ключа сервера</option></select></label>
+                  <div id="remote-password-row" class="settings-field"><label for="remote-password">SSH-пароль</label><div class="server-password-field"><input id="remote-password" type="password" autocomplete="new-password" /><button id="remote-password-lock" type="button" class="button-secondary server-password-lock" aria-label="Сохранить пароль" aria-pressed="false" title="Сохранить пароль" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path class="lock-shackle" d="M8 10V7a4 4 0 0 1 8 0v3"/><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M12 14v3"/></svg></button></div><small id="remote-password-note" class="repository-field-help">Нажмите замок, чтобы сохранить пароль в защищённом хранилище Windows.</small></div>
+                  <div id="remote-key-row" class="repository-wide hidden"><div class="repository-file-row"><label class="settings-field"><span>Приватный ключ сервера, не ключ GitHub</span><input id="remote-identity-file" type="text" readonly /></label><button id="remote-choose-key" type="button" class="button-secondary">Выбрать ключ</button></div><label class="settings-field"><span>Пароль ключа, если установлен</span><input id="remote-passphrase" type="password" autocomplete="new-password" /></label></div>
+                  <div class="repository-wide"><button id="remote-clear-credentials" type="button" class="button-secondary">Очистить несохранённый ввод</button></div>
+                  </div>
+                  <div class="deployment-pane-footer"><button type="button" data-deploy-next="preparation">К подготовке</button></div>
+                  </section>
+                  <section data-deploy-pane="preparation" class="deployment-pane repository-wide hidden">
+                  <div class="deployment-pane-heading"><h3>Подготовка к установке</h3><p>План, пакет и проверка выполняются по очереди. Установка здесь не запускается.</p></div>
+                  <div id="remote-existing-checks" class="repository-wide remote-public-actions hidden"><span class="repository-field-help">Пароль не попадает в журнал. Обе проверки не меняют сервер.</span><button id="remote-inspect-button" type="submit">Проверить вход и установку</button><button id="remote-preflight-button" type="button" class="button-secondary">Проверить готовность обновления</button></div>
+                  <section id="new-installation-panel" class="repository-wide installation-panel">
+                    <label class="settings-field repository-wide"><span>Учебные материалы новой LMS</span><select id="new-installation-content-mode"><option value="">Выберите наполнение</option><option value="source">Темы и тесты из выбранного Git</option><option value="empty">Пустая учебная база</option></select><small class="repository-field-help">Переносятся только темы и тесты. Пользователи, пароли и прогресс из репозитория не копируются.</small></label>
+                    <dl id="new-installation-summary" class="installation-summary hidden">
+                      <div><dt>Клиент</dt><dd id="new-installation-client"></dd></div><div><dt>Git-версия</dt><dd id="new-installation-source"></dd></div>
+                      <div><dt>Целевая БД</dt><dd id="new-installation-database"></dd></div><div><dt>Сервер проверен</dt><dd id="new-installation-server"></dd></div>
+                    </dl>
+                    <div class="deployment-checkpoint"><div><strong>1. План клиента</strong><small id="deployment-plan-state">Еще не подготовлен</small></div><button id="new-installation-prepare" type="button">Подготовить план</button></div>
+                    <div class="deployment-checkpoint"><div><strong>2. Установочный пакет</strong><small id="deployment-package-state">Сначала подготовьте план</small></div><button id="new-installation-package" type="button" class="button-secondary" disabled>Собрать пакет</button></div>
+                    <div class="deployment-checkpoint"><div><strong>3. Проверка сервера</strong><small id="deployment-server-state">Сначала соберите пакет</small></div><button id="new-installation-server-check" type="button" class="button-secondary" disabled>Проверить сервер</button></div>
+                    <details id="deployment-environment-tools" class="deployment-environment-tools"><summary>Если сервер не готов: окружение и память</summary><p class="repository-field-help">Эти команды изменяют сервер только после отдельного подтверждения. После завершения повторите «Проверить сервер».</p>
+                    <div class="installation-actions"><button id="prepare-server-memory" type="button" class="button-secondary" disabled>Добавить swap до 4 ГиБ</button><button id="prepare-clean-server" type="button" class="button-secondary" disabled>Подготовить чистую Ubuntu</button><button id="refresh-server-preparation" type="button" class="button-secondary">Проверить подготовку</button></div>
+                    </details>
+                  </section>
+                  <div class="deployment-pane-footer"><button type="button" class="button-secondary" data-deploy-next="connection">Назад</button><button type="button" data-deploy-next="installation">К установке</button></div>
+                  </section>
+                  <section data-deploy-pane="installation" class="deployment-pane repository-wide hidden">
+                    <div class="deployment-pane-heading"><h3>Доступы и запуск</h3><p>Перед изменением сервера Core покажет отдельное окно подтверждения.</p></div>
+                    <div id="deployment-new-install-controls">
+                    <details id="new-installation-credentials" open><summary>PostgreSQL и администраторы LMS</summary>
+                      <p class="repository-field-help">Core создаст отдельную базу и служебный пароль. Для PostgreSQL на этом же подготовленном сервере пароль postgres не нужен.</p>
+                      <label class="settings-field"><span>Подключение PostgreSQL</span><select id="install-db-mode"><option value="local_peer">На этом сервере — автоматически, без пароля postgres</option><option value="password">Отдельная БД — по административным реквизитам PostgreSQL</option></select></label>
+                      <button id="recover-new-installation" type="button" class="button-secondary hidden">Восстановить запуск</button>
+                      <div class="repository-grid">
+                        <label class="settings-field"><span>Хост PostgreSQL со стороны Linux</span><input id="install-db-host" type="text" value="127.0.0.1" /></label>
+                        <label class="settings-field"><span>Порт PostgreSQL</span><input id="install-db-port" type="number" min="1" max="65535" value="5432" /></label>
+                        <label class="settings-field"><span>Администратор PostgreSQL</span><input id="install-db-user" type="text" value="postgres" /></label>
+                        <label class="settings-field"><span>Пароль администратора PostgreSQL</span><input id="install-db-password" type="password" autocomplete="new-password" /></label>
+                        <p id="installation-access-note" class="repository-field-help repository-wide">Доступы подставляются из карточки выбранного клиента.</p>
+                        <label class="settings-field repository-wide"><span>Имя администратора клиента</span><input id="install-client-name" type="text" /></label>
+                        <label class="settings-field"><span>Логин администратора клиента</span><input id="install-client-login" type="text" autocomplete="off" /></label>
+                        <label class="settings-field"><span>Пароль администратора клиента (от 12 символов)</span><input id="install-client-password" type="password" autocomplete="new-password" /></label>
+                        <label class="settings-field"><span>Логин системного администратора</span><input id="install-system-login" type="text" autocomplete="off" /></label>
+                        <label class="settings-field"><span>Пароль системного администратора (от 12 символов)</span><input id="install-system-password" type="password" autocomplete="new-password" /></label>
+                      </div>
+                    </details>
+                    <div class="installation-actions deployment-primary-actions"><button id="new-installation-start" type="button" disabled>Установить LMS на сервер</button><button id="new-installation-refresh" type="button" class="button-secondary" disabled>Проверить результат установки</button></div>
+                    <p id="deployment-install-lock" class="repository-field-help">Завершите подготовку перед установкой.</p>
+                    </div>
+                  <div id="remote-update-actions" class="repository-wide remote-update-actions hidden">
+                    <label class="remote-swap-option"><input id="remote-allow-swap" type="checkbox" checked /><span>При нехватке памяти разрешить swap до 4 GiB без автозагрузки</span></label>
+                    <div class="remote-public-actions"><button id="remote-deploy-button" type="button">Обновить LMS из полученного кода</button><button id="remote-deployment-refresh" type="button" class="button-secondary">Проверить результат</button></div>
+                  </div>
+                  <div class="deployment-pane-footer"><button type="button" class="button-secondary" data-deploy-next="preparation">Назад</button><button type="button" data-deploy-next="access">К открытию LMS</button></div>
+                  </section>
+                  <section data-deploy-pane="access" class="deployment-pane repository-wide hidden">
+                    <div class="deployment-pane-heading"><h3>Открыть установленную LMS</h3><p>SSH-просмотр работает без публичного порта. Доступ по IP настраивается отдельно.</p></div>
+                    <p id="deployment-access-hint" class="repository-field-help">Открытие станет доступно после успешной установки выбранного клиента.</p>
+                    <div id="deployment-new-access">
+                      <div class="installation-actions"><button id="new-installation-open-lms" type="button" class="button-secondary" disabled>Открыть LMS через SSH</button></div>
+                      <details id="ai-configuration-panel" class="ai-configuration-panel hidden" open>
+                        <summary>ИИ: Alice AI</summary>
+                        <p class="repository-field-help">Все параметры ИИ — здесь. Core запишет их в серверный .env.production.local и перезапустит только веб-службу этой LMS.</p>
+                        <label class="settings-field"><span>API-токен</span><input id="ai-api-key" type="password" maxlength="8192" autocomplete="new-password" spellcheck="false" placeholder="Только значение токена, без Bearer" /></label>
+                        <p id="ai-key-presence" class="repository-field-help">Токен еще не проверен.</p>
+                        <div class="repository-grid">
+                          <label class="settings-field"><span>ID каталога Yandex Cloud</span><input id="ai-project-id" maxlength="256" autocomplete="off" spellcheck="false" placeholder="ID каталога из примера подключения" /></label>
+                          <label class="settings-field"><span>ID агента / Prompt</span><input id="ai-prompt-id" maxlength="256" autocomplete="off" spellcheck="false" placeholder="ID созданного агента, не код клиента" /></label>
+                          <label class="settings-field repository-wide"><span>ID базы знаний (Vector Store)</span><input id="ai-vector-store-id" maxlength="256" autocomplete="off" spellcheck="false" placeholder="ID созданного поискового индекса" /></label>
+                        </div>
+                        <p class="repository-field-help">Укажите ID каталога и совместимого Prompt клиента. «Создать базу и подключить» создаст отдельный пустой Vector Store или использует ранее созданный Core для этого клиента и сам запишет его ID. Поле Vector Store для этой команды заполнять не нужно. Создание самого Prompt через API Яндекс не поддерживает: один раз сохраните конфигурацию в Responses API, не текстовый runtime-agent. Номер клиента, название и ID API-ключа не заменяют эти ID.</p>
+                        <div class="installation-actions"><button id="ai-configuration-provision" type="button" disabled>Создать базу и подключить</button><button id="ai-configuration-apply" type="button" class="button-secondary" disabled>Применить введённые ID</button><button id="ai-configuration-check" type="button" class="button-secondary" disabled>Проверить настройки ИИ</button><button id="ai-configuration-clear" type="button" class="button-secondary" disabled>Очистить ввод</button></div>
+                        <p class="repository-field-help">Проверка читает наличие параметров и состояние LMS, но не вызывает платный ИИ и не проверяет действительность токена.</p>
+                      </details>
+                      <details id="mail-configuration-panel" class="ai-configuration-panel hidden">
+                        <summary>Почта уведомлений и поддержки</summary>
+                        <p class="repository-field-help">Один адрес для отправки уведомлений, футера, mailto-ссылок и контактов в политике. Core применит его на сервере; адреса сотрудников не меняются.</p>
+                        <div class="repository-grid">
+                          <label class="settings-field repository-wide"><span>Почта отправителя и поддержки / SMTP-логин</span><input id="mail-user" type="email" maxlength="254" autocomplete="off" spellcheck="false" placeholder="support@example.ru" /></label>
+                          <label class="settings-field"><span>SMTP-сервер</span><input id="mail-host" maxlength="253" autocomplete="off" spellcheck="false" placeholder="smtp.example.ru" /></label>
+                          <label class="settings-field"><span>Порт SMTP</span><input id="mail-port" type="number" min="1" max="65535" autocomplete="off" placeholder="465" /></label>
+                          <label class="settings-field repository-wide"><span>Шифрование</span><select id="mail-secure"><option value="true">TLS с начала соединения (обычно порт 465)</option><option value="false">STARTTLS (обычно порт 587)</option></select></label>
+                          <label class="settings-field repository-wide"><span>Пароль приложения для почты</span><input id="mail-password" type="password" maxlength="1024" autocomplete="new-password" spellcheck="false" placeholder="Не пароль от Core или LMS" /></label>
+                        </div>
+                        <p id="mail-password-presence" class="repository-field-help">Пароль не сохраняется на ноутбуке.</p>
+                        <p id="mail-starttls-warning" class="repository-field-help hidden">В исходной LMS STARTTLS включается, когда SMTP-сервер предлагает его; без такого предложения обработчик может допустить незашифрованное соединение. Для уведомлений используйте TLS-порт, если провайдер его поддерживает. Тестовое письмо Core требует TLS в обоих режимах.</p>
+                        <div class="installation-actions"><button id="mail-configuration-apply" type="button" disabled>Сохранить почту на сервере</button><button id="mail-configuration-check" type="button" class="button-secondary" disabled>Прочитать настройки почты</button><button id="mail-configuration-clear" type="button" class="button-secondary" disabled>Очистить ввод</button></div>
+                        <label class="settings-field"><span>Получатель одного тестового письма</span><input id="mail-test-recipient" type="email" maxlength="254" autocomplete="off" spellcheck="false" placeholder="Ваш адрес для проверки" /></label>
+                        <div class="installation-actions"><button id="mail-configuration-test" type="button" class="button-secondary" disabled>Отправить тестовое письмо</button></div>
+                        <p class="repository-field-help">Первая настройка старой LMS может потребовать отдельной сборки адаптера; до переключения старый сайт работает. Последующие смены почты — без сборки. Чтение настроек не отправляет писем; тест подтверждается отдельно. Правила уведомлений и адреса сотрудников остаются прежними.</p>
+                      </details>
+                      <details id="ip-publication-panel" class="hidden"><summary>Доступ в обычном браузере</summary><p class="repository-field-help">Сначала настройте доступ по IP, затем включите HTTPS. Сертификат и автопродление настраиваются на сервере; ноутбук можно выключать. Нужны открытые порты 80 и 443. До HTTPS используйте только временные учетки и ненастоящие данные.</p><div class="installation-actions"><button id="ip-publication-start" type="button" class="button-secondary">Опубликовать по IP</button><button id="ip-publication-https" type="button" class="button-primary" disabled>Включить HTTPS</button><button id="ip-publication-check" type="button" class="button-secondary">Проверить IP-доступ</button><button id="ip-publication-open" type="button" class="button-secondary" disabled>Открыть в браузере</button></div><p class="repository-field-help">Выпуск потребует отдельного подтверждения условий Let's Encrypt и публикации IP в журналах сертификатов. Приватный ключ остается на сервере.</p></details>
+                      <details id="lms-removal-panel" class="ai-configuration-panel hidden"><summary>Полное удаление LMS и БД</summary><p class="repository-field-help">После проверенной резервной копии удаляются сайт, его отдельная БД, SQL-роль и служебная Linux-учетка. Карточка клиента и сохранённые доступы остаются для новой установки. Другие сайты и общий PostgreSQL/Nginx не затрагиваются.</p><p id="lms-removal-readiness" class="repository-field-help"></p><div class="installation-actions"><button id="lms-removal-prepare" type="button" class="button-secondary" disabled>Проверить удаление</button><button id="lms-removal-execute" type="button" class="button-secondary" disabled>Удалить LMS и БД</button><button id="lms-removal-refresh" type="button" class="button-secondary" disabled>Проверить результат удаления</button></div></details>
+                    </div>
+                    <div class="deployment-pane-footer"><button type="button" class="button-secondary" data-deploy-next="installation">Назад</button></div>
+                  </section>
+                </form>
+                <aside class="deployment-console" aria-label="Ход выполнения">
+                  <div class="deployment-console-heading"><strong>Ход выполнения</strong><span id="deployment-operation-state" data-tone="idle">Ожидание</span></div>
+                  <p class="deployment-observation-note">Последнее полученное состояние. Дата проверки указана в результате.</p>
+                  <small class="deployment-feedback-label">Последнее сообщение</small>
+                  <p id="remote-feedback" class="deployment-feedback" role="status" aria-live="polite">SSH-вход ещё не проверен.</p>
+                  <h4 id="deployment-result-title">Подключение к серверу</h4>
+                  <div class="deployment-console-body">
+                    <section data-deploy-result="connection"><p id="remote-candidate">Отпечаток сервера еще не получен.</p></section>
+                    <section data-deploy-result="checks" class="hidden"><pre id="remote-inventory"></pre><pre id="remote-preflight-result"></pre></section>
+                    <section data-deploy-result="plan" class="hidden"><p id="new-installation-status" role="status" aria-live="polite">Выберите клиента и получите Git-код, затем подготовьте план.</p><p id="new-installation-package-info"></p><ul id="new-installation-blockers" class="installation-blockers"></ul><details id="new-installation-details" class="hidden"><summary>Все проверки</summary><ul id="new-installation-checks" class="installation-checks"></ul></details></section>
+                    <section data-deploy-result="memory" class="hidden"><p id="server-memory-result" role="status"></p></section>
+                    <section data-deploy-result="environment" class="hidden"><p id="server-preparation-result" role="status"></p></section>
+                    <section data-deploy-result="installation" class="hidden"><pre id="new-installation-result" role="status" aria-live="polite">Установка ещё не выполнялась.</pre></section>
+                    <section data-deploy-result="update" class="hidden"><pre id="remote-deployment-result" role="status" aria-live="polite">Обновления через Core ещё не выполнялись.</pre></section>
+                    <section data-deploy-result="access" class="hidden"><pre id="ip-publication-result" role="status" aria-live="polite">Публичный вход ещё не настроен.</pre></section>
+                    <section data-deploy-result="ai" class="hidden"><pre id="ai-configuration-result" role="status" aria-live="polite">Параметры ИИ еще не проверялись.</pre></section>
+                    <section data-deploy-result="mail" class="hidden"><pre id="mail-configuration-result" role="status" aria-live="polite">Параметры почты еще не проверялись.</pre></section>
+                    <section data-deploy-result="removal" class="hidden"><pre id="lms-removal-result" role="status" aria-live="polite">Удаление LMS еще не проверялось.</pre></section>
+                  </div>
+                  <details class="deployment-history" open><summary>Этапы и действия <span id="deployment-history-count">0</span></summary><ol id="deployment-history" aria-live="off"></ol><p id="deployment-history-empty">История текущего окна. Секреты не записываются.</p></details>
+                </aside>
+                </div>
+              </details>
+            </section>
+            <details id="repository-key-details" class="content-panel repository-key-details">
+              <summary>Отдельный ключ Core и доступ в GitHub</summary>
+              <div class="repository-key-body">
+                <p class="surface-copy">Создайте ключ здесь, затем добавьте его публичную часть в GitHub: Settings → Deploy keys → Add deploy key. Право записи «Allow write access» оставьте выключенным.</p>
+                <div class="repository-key-actions"><button id="repository-create-key" type="button" class="button-secondary">Создать отдельный ключ Core</button><button id="repository-copy-public-key" type="button" class="button-secondary" disabled>Копировать публичный ключ</button><button id="repository-github-settings" type="button" class="button-secondary">Открыть Deploy keys в GitHub</button></div>
+                <label class="settings-field"><span>Публичный ключ (его можно добавить в GitHub)</span><textarea id="repository-public-key" rows="3" readonly spellcheck="false" placeholder="Появится после создания ключа"></textarea></label>
+                <p id="repository-key-fingerprint" class="repository-fingerprint">Ключ Core пока не создан.</p>
+                <p class="surface-copy">Закрытая часть хранится с защитой текущей учетной записи Windows. Ключ не добавляется в GitHub автоматически. После добавления нажмите «Сохранить и проверить».</p>
+              </div>
+            </details>
+          </div>
+        </section>
+
+        <section id="view-services" class="workspace-view">
+          <div class="content-stack">
+            <section class="content-panel section-header-panel optional-hint">
+              <div class="panel-topline">
+                <strong>Сервисы</strong>
+                <span class="panel-caption">Запуск, остановка, URL и логи</span>
+              </div>
+            </section>
+            <section id="services-grid" class="services-grid"></section>
+          </div>
+        </section>
+
+        <section id="view-browser" class="workspace-view">
+          <div class="content-stack browser-view-shell">
+            <section class="content-panel browser-panel">
+              <div class="browser-panel-topline">
+                <div class="browser-top-actions">
+                  <div class="browser-tabs">
+                    <button id="browser-tab-deploy" class="button-secondary browser-tab hidden" aria-hidden="true" tabindex="-1">Панель клиентов</button>
+                    <button id="browser-tab-preview" class="button-secondary browser-tab">LMS из Git</button>
+                    <button id="browser-tab-remote" class="button-secondary browser-tab hidden">LMS через SSH</button>
+                  </div>
+                  <span class="browser-client-label">Клиент: <strong id="stat-preview-client">Не выбран</strong></span>
+                  <button id="choose-preview-client-button" class="button-secondary">Выбрать клиента</button>
+                  <button id="delete-client-button" class="button-secondary client-delete-button" type="button" disabled>Удалить клиента и БД</button>
+                  <button id="toggle-browser-focus-button" class="button-secondary" aria-pressed="false">Развернуть просмотр</button>
+                  <button id="reload-embedded-panel-button" class="button-secondary">Перезагрузить окно</button>
+                  <button id="close-lms-viewer" class="button-secondary hidden">Закрыть соединение</button>
+                </div>
+              </div>
+
+              <input id="browser-client-id-input" type="hidden" />
+              <p id="browser-navigation-warning" class="browser-navigation-warning hidden" role="alert"></p>
+              <input id="browser-address-input" type="hidden" />
+              <p id="lms-viewer-caption" class="source-version-meta hidden" role="status"></p>
+              <div id="native-lms-view-host" class="embedded-panel-frame hidden"></div>
+              <section id="git-preview-controls" class="hidden" aria-label="Локальный просмотр Git-LMS">
+                <div class="browser-top-actions git-preview-controlbar">
+                  <div class="git-preview-launch-actions">
+                  <button id="git-preview-start">Запустить локально</button>
+                  <button id="git-preview-stop" class="button-secondary" disabled>Остановить и очистить</button>
+                  <button id="git-preview-repository" class="button-secondary">Источник Git</button>
+                  </div>
+                  <div class="git-preview-session-actions">
+                  <button id="git-preview-admin" class="button-secondary" disabled>Войти как администратор</button>
+                  <button id="git-preview-system" class="button-secondary" disabled>Войти как системный администратор</button>
+                  <button id="point-editor-toggle" class="button-secondary" aria-pressed="false" disabled>Редактировать LMS</button>
+                  </div>
+                </div>
+                <p id="git-preview-status" class="source-version-meta" role="status">Старое превью отключено. Выберите полученную Git-версию.</p>
+                <p id="git-preview-version" class="source-version-meta optional-hint"></p>
+              </section>
+              <div id="point-workspace" class="point-workspace hidden">
+                <div id="native-git-view-host" class="embedded-panel-frame hidden"></div>
+                <aside id="point-inspector" class="point-inspector hidden" aria-label="Свойства выбранного элемента LMS">
+                  <div class="point-inspector-head"><strong>Свойства элемента</strong><button id="point-close" class="button-secondary" aria-label="Скрыть свойства">Скрыть</button></div>
+                  <p id="point-status" role="status" aria-live="polite">Нажмите на текст или кнопку в LMS.</p>
+                  <button id="point-pick" class="button-secondary" aria-pressed="false">Выбрать элемент</button>
+                  <label class="settings-field"><span>Элемент</span><select id="point-element"><option value="">Нажмите на элемент в LMS</option></select></label>
+                  <div id="point-fields" class="hidden">
+                    <label id="point-text-row" class="settings-field"><span>Текст</span><textarea id="point-text" rows="3" maxlength="2000" placeholder="Исходная подпись"></textarea><small>Пусто = исходный текст.</small></label>
+                    <label class="settings-field"><span>Стили для темы</span><select id="point-scope"><option value="light">Светлая</option><option value="dark">Тёмная</option><option value="all">Обе темы</option></select></label>
+                    <div id="point-color-fields">
+                      <label class="point-color-row" data-point-property="color"><span>Текст</span><input type="color" data-point-color="color" aria-label="Цвет текста" /><input type="text" data-point-value="color" maxlength="7" placeholder="Исходный" aria-label="Код цвета текста" /><button data-point-reset="color" class="button-secondary" title="Вернуть исходный цвет текста">Сброс</button></label>
+                      <label class="point-color-row" data-point-property="backgroundColor"><span>Фон</span><input type="color" data-point-color="backgroundColor" aria-label="Цвет фона" /><input type="text" data-point-value="backgroundColor" maxlength="7" placeholder="Исходный" aria-label="Код цвета фона" /><button data-point-reset="backgroundColor" class="button-secondary" title="Вернуть исходный фон">Сброс</button></label>
+                      <label class="point-color-row" data-point-property="borderColor"><span>Обводка</span><input type="color" data-point-color="borderColor" aria-label="Цвет обводки" /><input type="text" data-point-value="borderColor" maxlength="7" placeholder="Исходный" aria-label="Код цвета обводки" /><button data-point-reset="borderColor" class="button-secondary" title="Вернуть исходную обводку">Сброс</button></label>
+                    </div>
+                    <label class="settings-field" data-point-property="fontFamily"><span>Шрифт</span><select id="point-font"><option value="">Исходный шрифт</option></select></label>
+                    <div class="point-font-row">
+                      <label class="settings-field" data-point-property="fontSizePx"><span>Размер, px</span><input id="point-size" type="number" min="10" max="64" step="1" placeholder="Исходный" /></label>
+                      <label class="settings-field" data-point-property="fontWeight"><span>Начертание</span><select id="point-weight"><option value="">Исходное</option><option value="400">Обычное</option><option value="500">Среднее</option><option value="600">Полужирное</option><option value="700">Жирное</option><option value="800">Очень жирное</option><option value="900">Плотное</option></select></label>
+                    </div>
+                    <button id="point-reset-element" class="button-secondary">Сбросить правки элемента</button>
+                  </div>
+                  <div class="point-save-actions"><button id="point-save" disabled>Сохранить для установки</button><button id="point-discard" class="button-secondary" disabled>Отменить правки</button><button id="point-reload" class="button-secondary">Перечитать сохранённое</button></div>
+                  <p class="point-hint">Только явно изменённые свойства. Логотип, соседние элементы и остальные стили сохраняются.</p>
+                </aside>
+              </div>
+
+              <div id="embedded-panel-offline" class="embedded-panel-offline hidden">
+                <strong id="embedded-panel-offline-title">Сервис сейчас не запущен</strong>
+                <p id="embedded-panel-offline-text">Запусти нужный сервис и обнови встроенный просмотр.</p>
+                <button id="start-embedded-panel-button">Запустить сервис</button>
+              </div>
+
+              <iframe
+                id="embedded-panel-frame"
+                class="embedded-panel-frame"
+                src="about:blank"
+                title="Встроенный просмотр LMS Core"
+              ></iframe>
+            </section>
+          </div>
+        </section>
+
+        <section id="view-logs" class="workspace-view">
+          <div class="content-stack">
+            <section class="content-panel log-panel">
+              <div class="panel-topline">
+                <div>
+                  <strong>Журнал</strong>
+                  <p id="log-panel-caption" class="panel-caption">Выбери лог сервиса</p>
+                </div>
+                <div class="log-toolbar"><span id="log-update-status" class="panel-caption" role="status" aria-live="polite">Откройте журнал</span><button id="log-scroll-bottom" class="button-secondary">В конец</button><button id="open-log-view-launcher-button" class="button-secondary">Журнал приложения</button></div>
+              </div>
+              <pre id="log-panel-content">Пока лог не открыт.</pre>
+            </section>
+          </div>
+        </section>
+
+        <section id="view-database" class="workspace-view">
+          <div class="content-stack database-view-shell">
+            <section class="content-panel database-panel">
+              <div class="panel-topline">
+                <div>
+                  <strong>PostgreSQL</strong>
+                  <p id="database-caption" class="panel-caption">Локальная база `lms_core`</p>
+                </div>
+                <div class="database-actions">
+                  <button id="refresh-database-button" class="button-secondary">Обновить</button>
+                  <button id="open-database-pgadmin-button" class="button-secondary">Открыть pgAdmin</button>
+                </div>
+              </div>
+
+              <div class="database-layout">
+                <aside class="database-table-list" id="database-table-list">
+                  <div class="database-empty">Загрузка таблиц...</div>
+                </aside>
+
+                <section class="database-table-preview">
+                  <div class="database-preview-head">
+                    <div>
+                      <strong id="database-selected-table">Таблица не выбрана</strong>
+                      <p id="database-selected-table-meta" class="panel-caption">Выбери таблицу слева</p>
+                    </div>
+                    <span class="database-readonly-badge">Только просмотр</span>
+                  </div>
+
+                  <div class="database-preview-scroll">
+                    <table class="database-preview-table" id="database-preview-table"></table>
+                  </div>
+                </section>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section id="view-settings" class="workspace-view">
+          <div class="content-stack settings-workspace">
+            <div class="settings-heading"><div><h2>Ваше рабочее пространство</h2><p>Настройки Core сохраняются автоматически. Сайты клиентов не изменятся.</p></div><div class="settings-save-area"><span id="settings-save-status" role="status" aria-live="polite">Настройки загружаются</span><button id="retry-settings-save" class="button-secondary hidden">Сохранить повторно</button></div></div>
+            <nav class="settings-tabs" aria-label="Группы настроек">
+              <button data-settings-tab="appearance" class="is-current" aria-pressed="true">Оформление</button>
+              <button data-settings-tab="behavior" aria-pressed="false">Поведение</button>
+              <button data-settings-tab="logs" aria-pressed="false">Журналы</button>
+              <button data-settings-tab="system" aria-pressed="false">Система</button>
+            </nav>
+            <div data-settings-group="appearance" class="content-stack">
+              <section class="content-panel">
+                <div class="panel-topline"><strong>Цветовая палитра</strong><span id="active-theme-label" class="panel-caption">Полночь</span></div>
+                <div class="theme-grid" aria-label="Палитры приложения">
+                  <button class="theme-preset-button" data-theme-choice="midnight"><span class="palette-sample" aria-hidden="true"></span><strong>Полночь</strong><small>Тёмная · мята</small></button>
+                  <button class="theme-preset-button" data-theme-choice="graphite"><span class="palette-sample" aria-hidden="true"></span><strong>Графит</strong><small>Тёмная · нейтральная</small></button>
+                  <button class="theme-preset-button" data-theme-choice="ocean"><span class="palette-sample" aria-hidden="true"></span><strong>Океан</strong><small>Тёмная · синяя</small></button>
+                  <button class="theme-preset-button" data-theme-choice="forest"><span class="palette-sample" aria-hidden="true"></span><strong>Хвойный</strong><small>Тёмная · зелёная</small></button>
+                  <button class="theme-preset-button" data-theme-choice="ember"><span class="palette-sample" aria-hidden="true"></span><strong>Терракота</strong><small>Тёмная · тёплая</small></button>
+                  <button class="theme-preset-button" data-theme-choice="sand"><span class="palette-sample" aria-hidden="true"></span><strong>Песок</strong><small>Светлая · тёплая</small></button>
+                  <button class="theme-preset-button" data-theme-choice="porcelain"><span class="palette-sample" aria-hidden="true"></span><strong>Фарфор</strong><small>Светлая · синяя</small></button>
+                  <button class="theme-preset-button" data-theme-choice="mist"><span class="palette-sample" aria-hidden="true"></span><strong>Туман</strong><small>Светлая · зелёная</small></button>
+                </div>
+              </section>
+              <section class="content-panel">
+                <div class="panel-topline"><strong>Читаемость и пространство</strong></div>
+                <div class="settings-options-grid">
+                  <label class="settings-field"><span>Плотность блоков</span><select id="density-select"><option value="comfortable">Свободная</option><option value="compact">Компактная</option></select></label>
+                  <label class="settings-field"><span>Размер текста</span><select id="text-size-select"><option value="normal">Обычный</option><option value="large">Увеличенный</option></select></label>
+                  <label class="settings-field"><span>Боковое меню</span><select id="sidebar-width-select"><option value="standard">Обычная ширина</option><option value="narrow">Узкое</option></select></label>
+                  <label class="settings-field"><span>Пояснения в интерфейсе</span><select id="detail-level-select"><option value="essential">Только необходимое</option><option value="detailed">С пояснениями</option></select></label>
+                  <label class="settings-field"><span>Шрифт приложения</span><select id="ui-font-select"><option value="humanist">Candara — мягкий</option><option value="technical">Bahnschrift — строгий</option><option value="system">Segoe UI — привычный</option></select></label>
+                  <label class="settings-field"><span>Ширина рабочей области</span><select id="content-width-select"><option value="full">Вся доступная ширина</option><option value="focused">Сосредоточенная — до 1120 px</option></select><small>Просмотр LMS и таблицы всегда используют всю ширину.</small></label>
+                  <label class="settings-field"><span>Границы блоков</span><select id="border-contrast-select"><option value="soft">Мягкие</option><option value="strong">Более заметные</option></select></label>
+                </div>
+                <label class="toggle-field setting-row"><input id="reduced-motion-checkbox" type="checkbox" /><span>Уменьшить анимации и отключить плавную прокрутку</span></label>
+              </section>
+              <div class="settings-reset-row"><span>Серверы, клиенты и доступы не затрагиваются.</span><button id="reset-appearance-button" class="button-secondary">Сбросить оформление</button></div>
+            </div>
+            <div data-settings-group="behavior" class="content-stack hidden">
+              <section class="content-panel">
+                <div class="panel-topline"><strong>При открытии приложения</strong></div>
+                <div class="settings-form">
+                  <label class="settings-field">
+                    <span>Стартовый раздел</span>
+                    <select id="default-view-select">
+                      <option value="overview">Источники кода</option>
+                      <option value="services">Сервисы</option>
+                      <option value="browser">Клиенты</option>
+                      <option value="lms">LMS</option>
+                      <option value="database">База данных</option>
+                      <option value="repository">Репозиторий</option>
+                      <option value="logs">Журнал</option>
+                      <option value="settings">Настройки</option>
+                    </select>
+                  </label>
+                  <label class="toggle-field"><input id="maximize-on-start-checkbox" type="checkbox" /><span>Разворачивать окно на весь экран при запуске</span></label>
+
+                  <label class="toggle-field">
+                    <input id="auto-focus-preview-checkbox" type="checkbox" />
+                    <span>Автоматически разворачивать клиентское превью в большой просмотр</span>
+                  </label>
+
+                  <label class="toggle-field">
+                    <input id="remember-last-view-checkbox" type="checkbox" />
+                    <span>Запоминать последний открытый раздел</span>
+                  </label>
+                  <label class="toggle-field"><input id="show-service-summary-checkbox" type="checkbox" /><span>Показывать сводку сервисов в боковом меню</span></label>
+                  <label class="toggle-field"><input id="keyboard-shortcuts-checkbox" type="checkbox" /><span>Горячие клавиши навигации</span></label>
+                  <p class="surface-copy shortcut-hint">Ctrl + 1…8 — разделы по порядку в меню. Ctrl + , — настройки. Не срабатывают при вводе текста и в диалогах.</p>
+                </div>
+              </section>
+              <section class="content-panel">
+                <div class="panel-topline"><strong>Обновление данных</strong><span id="status-refresh-caption" class="panel-caption">Каждые 5 с</span></div>
+                <label class="settings-field"><span>Проверять локальные сервисы</span><select id="status-interval-select"><option value="5000">Каждые 5 секунд</option><option value="10000">Каждые 10 секунд</option><option value="30000">Каждые 30 секунд</option></select></label>
+                <p class="surface-copy optional-hint">В скрытом окне фоновые опросы приостановлены. «Обновить статусы» всегда запускает новую проверку.</p>
+              </section>
+            </div>
+            <div data-settings-group="logs" class="content-stack hidden">
+              <section class="content-panel">
+                <div class="panel-topline"><strong>Чтение журналов</strong></div>
+                <div class="settings-options-grid">
+                  <label class="settings-field"><span>Показывать последние строки</span><select id="log-line-limit-select"><option value="300">300 строк — меньше нагрузки</option><option value="1000">1000 строк</option><option value="3000">3000 строк — больше контекста</option></select><small>Исходные файлы не обрезаются и не удаляются.</small></label>
+                  <label class="settings-field"><span>Обновлять журнал</span><select id="log-interval-select"><option value="2500">Каждые 2,5 секунды</option><option value="5000">Каждые 5 секунд</option><option value="10000">Каждые 10 секунд</option></select></label>
+                </div>
+                <label class="toggle-field setting-row"><input id="auto-refresh-logs-checkbox" type="checkbox" /><span>Автоматически обновлять открытый журнал</span></label>
+                <label class="toggle-field setting-row"><input id="log-wrap-checkbox" type="checkbox" /><span>Переносить длинные строки по ширине окна</span></label>
+                <p class="surface-copy">При выделении текста обновление приостанавливается, чтобы его было удобно скопировать.</p>
+              </section>
+            </div>
+            <div data-settings-group="system" class="content-stack hidden">
+              <section class="content-panel"><div class="panel-topline"><strong>Цели установки</strong><span class="settings-caution">Требует подтверждения</span></div><label class="settings-field"><span>Режим выполнения</span><select id="execution-mode-select"><option value="local">Только локальные проверки</option><option value="remote">Разрешить внешние SSH-серверы</option></select></label><p class="surface-copy">Изменение режима не запускает установку. Для внешнего режима требуется отдельное подтверждение.</p></section>
+              <section class="content-panel">
+                <div class="panel-topline">
+                  <strong>Управление сервисами</strong>
+                </div>
+                <p class="surface-copy">Локальные сервисы Core. Установленные LMS на серверах продолжат работать независимо.</p>
+                <div class="settings-action-grid">
+                  <button id="start-all-button" disabled>Проверка сервисов...</button>
+                  <button id="stop-all-button" class="button-secondary">Остановить всё</button>
+                </div>
+              </section>
+
+              <section class="content-panel">
+                <div class="panel-topline">
+                  <strong>Системные файлы</strong>
+                </div>
+                <p class="surface-copy optional-hint">Параметры запуска и диагностика приложения.</p>
+                <div class="settings-action-grid">
+                  <button id="open-config-button" class="button-secondary">Конфигурация запуска</button>
+                  <button id="open-launcher-log-button" class="button-secondary">Журнал приложения</button>
+                </div>
+              </section>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div id="preview-client-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="preview-client-modal-title">
+      <div class="modal-card">
+        <div class="panel-topline modal-topline">
+          <div>
+            <strong id="preview-client-modal-title">Выбор клиента для превью</strong>
+            <p id="preview-client-modal-caption" class="panel-caption">Загружаю список клиентов...</p>
+          </div>
+          <button id="close-preview-client-modal-button" class="button-secondary">Закрыть</button>
+        </div>
+
+        <div class="modal-search">
+          <input id="preview-client-search-input" type="text" placeholder="Поиск по имени, бренду или домену" />
+        </div>
+
+        <div id="preview-client-list" class="modal-client-list"></div>
+      </div>
+    </div>
+
+    <template id="service-card-template">
+      <article class="service-card">
+        <div class="service-topline">
+          <div>
+            <h2 class="service-title"></h2>
+            <p class="service-kind optional-hint"></p>
+          </div>
+          <span class="service-badge"></span>
+        </div>
+
+        <div class="service-feedback" aria-live="polite"></div>
+        <div class="service-actions">
+          <button class="start-button">Запустить</button>
+          <button class="stop-button button-secondary">Остановить</button>
+          <button class="show-app-button button-secondary">В приложении</button>
+        </div>
+        <details class="service-details">
+          <summary>Диагностика и инструменты</summary>
+          <div class="service-meta"></div>
+          <div class="service-tools">
+          <button class="open-url-button button-secondary">Открыть</button>
+          <button class="open-log-button button-secondary">Файл журнала</button>
+          <button class="show-log-button button-secondary">Читать журнал</button>
+          </div>
+        </details>
+
+        <p class="service-message"></p>
+      </article>
+    </template>
+
+    <script src="./preferences.js"></script>
+    <script src="./workspace-tools.js"></script>
+    <script src="./deployment-workflow.js"></script>
+    <script src="./ai-configuration.js"></script>
+    <script src="./mail-configuration.js"></script>
+    <script src="./refresh-queue.js"></script>
+    <script src="./client-choice.js"></script>
+    <script src="./panel-selection.js"></script>
+    <script src="./point-editor.js"></script>
+    <script src="./source-library.js"></script>
+    <script src="./server-access.js"></script>
+    <script src="./renderer.js"></script>
+  </body>
+</html>

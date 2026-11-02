@@ -1,0 +1,52 @@
+const test = require("node:test");
+const assert = require("node:assert/strict");
+const { chromium } = require("playwright");
+const { CATALOG, emptyPointDesign, FONTS, validatePointDesign } = require("../../../infra/scripts/point-design-contract.cjs");
+const { createPointRuntime } = require("../../../infra/lms-adapter/point-editor-preload.cjs");
+const { randomUUID } = require("node:crypto");
+
+test("point browser engine isolates text/theme/font, retains auth actions and restores exact source styles", { timeout: 40000 }, async () => {
+  const browser = await chromium.launch({ executablePath: "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe", headless: true });
+  try {
+    const page = await browser.newPage(), errors = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    await page.route("http://point.invalid/**", (route) => route.fulfill({ contentType: "text/html; charset=utf-8", body: '<!doctype html><html data-theme="light"><head><meta charset="utf-8"><style>body{background:#f5f7fa;color:#222;font-family:Georgia}button{color:white!important;background:#2e7d78!important;border-radius:11px}h1{font-size:24px}</style></head><body><div class="login-card-heading"><h1>Вход в Ватэс</h1><p>Введите данные, чтобы продолжить обучение.</p></div><button class="hover-unified-auth" onclick="window.pressed=(window.pressed||0)+1">ВОЙТИ</button><input placeholder="Логин"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="source logo"></body></html>' }));
+    await page.goto("http://point.invalid/login");
+    await page.locator("button").evaluate((element) => { element.style.background = "#0ABAB5"; element.style.borderRadius = "16px"; });
+    const inlineSource = await page.locator("button").getAttribute("style");
+    await page.addStyleTag({ content: '.hover-unified-auth[style*="rgb(10, 186, 181)"]{border-radius:11px!important}' });
+    const doc = emptyPointDesign(randomUUID(), "a".repeat(40));
+    await page.evaluate(({ engine, catalog, doc }) => { window.runtime = (0, eval)("(" + engine + ")")(window, catalog, doc, (value) => { window.selection = value; }); }, { engine: createPointRuntime.toString(), catalog: CATALOG, doc });
+    doc.elements["login.title"] = { text: "<b>Текст, не HTML</b>", styles: { light: { color: "#234567", fontFamily: FONTS.mono, fontSizePx: 30 } } };
+    doc.elements["login.submit"] = { text: "Войти в кабинет", styles: { light: { backgroundColor: "#123456" } } };
+    await page.evaluate((value) => window.runtime.update(value), validatePointDesign(doc));
+    await page.waitForFunction(() => document.querySelector("h1").textContent === "<b>Текст, не HTML</b>");
+    assert.equal(await page.locator("h1 b").count(), 0);
+    assert.equal(await page.locator("h1").evaluate((e) => getComputedStyle(e).fontSize), "30px");
+    assert.match(await page.locator("h1").evaluate((e) => getComputedStyle(e).fontFamily), /Consolas/);
+    assert.equal(await page.locator("p").evaluate((e) => getComputedStyle(e).fontFamily), "Georgia");
+    assert.equal(await page.locator("button").evaluate((e) => getComputedStyle(e).borderRadius), "11px");
+    assert.equal(await page.locator("button").getAttribute("style"), inlineSource);
+    await page.evaluate(() => window.runtime.enable(true));
+    await page.locator("button").click();
+    assert.equal(await page.evaluate(() => window.pressed || 0), 0); assert.equal(await page.evaluate(() => window.selection.id), "login.submit");
+    await page.evaluate(() => { document.documentElement.dataset.theme = "dark"; });
+    await page.waitForFunction(() => getComputedStyle(document.querySelector("h1")).fontSize === "24px");
+    assert.equal(await page.locator("button").evaluate((e) => getComputedStyle(e).backgroundColor), "rgb(46, 125, 120)");
+    await page.evaluate(() => { window.runtime.enable(false); }); await page.locator("button").click();
+    assert.equal(await page.evaluate(() => window.pressed), 1);
+    await page.evaluate(() => { document.querySelector("button").textContent = "ЗАРЕГИСТРИРОВАТЬСЯ"; });
+    await page.waitForTimeout(150);
+    assert.equal(await page.locator("button").textContent(), "ЗАРЕГИСТРИРОВАТЬСЯ");
+    doc.elements["login.title"].text = "Подпись  с  пробелами";
+    await page.evaluate((value) => { window.runtime.update(value); window.runtime.enable(true); }, validatePointDesign(doc));
+    await page.getByRole("heading", { name: "Подпись с пробелами", exact: true }).waitFor();
+    await page.locator("h1").click();
+    assert.equal(await page.evaluate(() => window.selection.id), "login.title");
+    await page.evaluate(() => window.runtime.dispose());
+    assert.equal(await page.locator("h1").textContent(), "Вход в Ватэс");
+    assert.equal(await page.locator("[data-core-point-highlight],[data-core-point]").count(), 0);
+    assert.equal(await page.locator("h1").getAttribute("style"), null);
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
